@@ -1,0 +1,6 @@
+{	
+	"server":"http://bl3dr.iriscouch.com/",
+	"database":"servers",
+	"constructor":"current",
+	"broker_cred":["guest","123456"]
+}
