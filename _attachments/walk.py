@@ -25,4 +25,5 @@ def walker(directory):
 			if ex.has_key(ext):
 				fname= root+os.sep+i
 				print(fname)
+				print os.stat(fname)
 				flist.append(fname) 
