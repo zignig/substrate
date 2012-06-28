@@ -57,18 +57,26 @@ def proc_next():
 
 def fetch_thing(thing_id):
 		tid = 'thing:'+str(thing_id)
-		if cq.redis.exists(tid):
-			return cq.redis.get(tid)
+		return fetch('/',tid)
+
+def fetch_page(page):
+		pid = 'page:'+str(page)
+		cq.redis.sadd('pages',pid)
+		return fetch('/newest/',pid)
+
+def fetch(prefix,name):
+		if cq.redis.exists(name):
+			return cq.redis.get(name)
 		else:
 			conn = httplib.HTTPConnection("thingiverse.com",port=80)
-			conn.request("GET", "/thing:"+str(thing_id))
+			conn.request("GET",prefix+str(name))
 			r1 = conn.getresponse()
 			print r1.status, r1.reason
 			data1 = r1.read()
 			conn.close()
 			if r1.status == 302:
-				cq.redis.set(tid,data1)
-				return cq.redis.get(tid)
+				cq.redis.set(name,data1)
+				return cq.redis.get(name)
 			else:
 				return None
 
@@ -146,4 +154,7 @@ def spool_things():
 def thing_chomp():
 	while True:
 		a = cq.channel.basic_get(queue='thing_stamp',no_ack=True)[2]
-		thing_stamp(json.loads(a)['_id'])
+		try:
+			thing_stamp(json.loads(a)['_id'])
+		except:
+			print('should spool error')

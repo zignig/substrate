@@ -23,7 +23,9 @@ class redis_query:
 			self.redis.expire(self.name,TTL)
 			return self.redis.zrevrange(self.name,0,length)
 
-	def __call__(self,query):
+	def __call__(self,query=''):
+		if query == '':
+			return self.list()
 		if self.redis.exists(self.name+':'+str(query)):
 			return list(self.redis.smembers(self.name+':'+str(query)))
 		else:
@@ -51,7 +53,7 @@ class couch_queue:
 			current = self.server[conf['database']][conf['constructor']]
 			self.db = self.server[current['databases'][0]]
 			brokers = current['broker']
-			#print(json.dumps(current,sort_keys=True,indent=4)) 
+			print(json.dumps(current,sort_keys=True,indent=4)) 
 			self.config = current
 		except:
 			print("couchdb fail")
@@ -75,7 +77,7 @@ class couch_queue:
 			print("build queries")
 			qs = self.config['redis_query']
 			for i in qs.keys():
-				print(i)
+				print('   '+i)
 				self.__dict__[i] = redis_query(self.db,self.redis,i,qs[i])
 		except:
 			print("redis failed")
@@ -121,14 +123,25 @@ class couch_queue:
 	def id(self,id):
 		ids = 'id:'+id
 		if self.redis.exists(ids):
-		 	return json.loads(str(self.redis.get(ids)))
+		 	doc = json.loads(str(self.redis.get(ids)))
+			#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
+			return doc 
 		else:
 			doc = self.db[id]
 			self.redis.set(ids,json.dumps(doc))
 			self.redis.expire(ids,TTL2)
-			print('fetch ;'+ids)
+			print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
+			self.redis.sadd('loaded',doc['_id'])
 			return doc	
 	
+	def load(self,items):
+		for i in items:
+			self.id(i)
+	
+	def spool(self,items):
+		for i in items:
+			self.message(json.dumps({'_id':i}),'incoming')
+
 	def sync(self):
 		if self.redis.exists('dirty'):
 			li = list(self.redis.smembers('dirty'))
