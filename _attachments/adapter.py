@@ -136,7 +136,7 @@ class couch_queue:
 			doc = self.db[id]
 			self.redis.set(ids,json.dumps(doc))
 			self.redis.expire(ids,TTL2)
-			print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
+			#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
 			self.redis.sadd('loaded',doc['_id'])
 			return doc	
 	

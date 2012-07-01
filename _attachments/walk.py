@@ -1,7 +1,7 @@
 #!/usr/bin/python -i
 import os,subprocess
 import pika,couchdbkit,json
-import adapter,traceback, string
+import adapter,traceback, string,uuid
 import readline , rlcompleter
 readline.parse_and_bind('tab:complete')
 print('bl3dr console')
@@ -46,4 +46,24 @@ def enspool():
 	for i in ex.values():
 		gen_and_spool(i)	
 	
+def chomp():
+	mime = 'application/sla'
+	while True:
+		mes = cq.channel.basic_get(queue=base_tag+mime,no_ack=True)[2]
+		ent = json.loads(mes)
+		print ent
+		id = str(uuid.uuid4())
+		print id
+		doc = {'_id':id}
+		cq.write(id,doc)
+		print doc
+		f_name = ent[0]+os.sep+ent[1]
+		print f_name
+		data = open(f_name).read()
+		try:
+			cq.db.put_attachment(doc,data,name=ent[1],content_type=mime)
+		except:
+			print 'fail'
+
 walker('/home/zignig/Downloads')
+enspool()
