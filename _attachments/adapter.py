@@ -13,7 +13,7 @@ class redis_query:
 		self.db = database
 		self.query = query
 
-	def list(self,length=10):
+	def list(self,length=200):
 		if self.redis.exists(self.name):
 			return self.redis.zrevrange(self.name,0,length)
 		else:
@@ -34,6 +34,7 @@ class redis_query:
 				for i in v:
 					self.redis.sadd(self.name+':'+str(query),i['id'])
 				self.redis.expire(self.name+':'+str(query),TTL)
+				self.redis.zadd(self.name,i['key'],len(v))
 				return list(self.redis.smembers(self.name+':'+str(query)))
 			else:
 				return [] 
@@ -76,9 +77,14 @@ class couch_queue:
 			print("connected")
 			print("build queries")
 			qs = self.config['redis_query']
+			# dict access to queries 
+			self.queries = {}
 			for i in qs.keys():
 				print('   '+i)
-				self.__dict__[i] = redis_query(self.db,self.redis,i,qs[i])
+				qe = redis_query(self.db,self.redis,i,qs[i])
+				self.queries[i] = qe
+				self.__dict__[i] = qe 
+
 		except:
 			print("redis failed")
 
@@ -134,6 +140,7 @@ class couch_queue:
 			self.redis.sadd('loaded',doc['_id'])
 			return doc	
 	
+		
 	def load(self,items):
 		for i in items:
 			self.id(i)
