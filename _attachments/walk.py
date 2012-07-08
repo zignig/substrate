@@ -46,8 +46,7 @@ def enspool():
 	for i in ex.values():
 		gen_and_spool(i)	
 	
-def chomp():
-	mime = 'application/sla'
+def chomp(mime='application/sla'):
 	while True:
 		mes = cq.channel.basic_get(queue=base_tag+mime,no_ack=True)[2]
 		ent = json.loads(mes)

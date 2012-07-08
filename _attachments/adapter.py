@@ -45,6 +45,7 @@ class couch_queue:
 		try:
 				os.stat(config)
 				conf = json.loads(open('config.json').read())
+				self.local_config = conf
 		except:
 				print("no config")
 
@@ -61,7 +62,8 @@ class couch_queue:
 		try:
 			print("connect to broker")
 			credentials = pika.PlainCredentials(conf['broker_cred'][0],conf['broker_cred'][1])
-			connection = pika.BlockingConnection(pika.ConnectionParameters(credentials=credentials,host=brokers[0]))
+			print brokers
+			connection = pika.BlockingConnection(pika.ConnectionParameters(credentials=credentials,host=str(brokers[0])))
 			channel = connection.channel()
 			channel.basic_qos(prefetch_count=1)
 			self.channel = channel
@@ -70,7 +72,7 @@ class couch_queue:
 			print("broker failed")
 		try:
 			print("connect to redis")
-			svr = self.config['redis']
+			svr = self.local_config['redis']
 			print(svr)
 			r = redis.Redis(svr)
 			self.redis = r
@@ -103,13 +105,13 @@ class couch_queue:
 		print "[X] building queues" 
 		for i in self.config['queues']:
 			print('creating queue '+i)
-			self.channel.queue_declare(queue=i)
+			self.channel.queue_declare(queue=str(i))
 		
 	def flush(self):
 		print "[X] flushing queues" 
 		for i in self.config['queues']:
 			print('flushing queue '+i)
-			self.channel.queue_purge(queue=i)
+			self.channel.queue_purge(queue=str(i))
 		
 	def message(self,mes,key='default'):
 		self.channel.basic_publish(exchange='', routing_key=key, body=mes)

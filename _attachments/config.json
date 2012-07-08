@@ -2,5 +2,7 @@
 	"server":"http://bl3dr.iriscouch.com/",
 	"database":"servers",
 	"constructor":"current",
-	"broker_cred":["guest","123456"]
+	"broker_cred":["guest","123456"],
+	"redis":"localhost",
+	"author": "random_maker"
 }
