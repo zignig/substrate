@@ -64,5 +64,3 @@ def chomp(mime='application/sla'):
 		except:
 			print 'fail'
 
-walker('/home/zignig/Downloads')
-enspool()

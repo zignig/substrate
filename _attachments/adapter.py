@@ -2,6 +2,7 @@
 import os,subprocess
 import pika,couchdbkit,json
 import yaml,pika,redis
+import threading
 
 TTL = 9600 
 TTL2 = 86400 
@@ -171,6 +172,13 @@ class couch_queue:
             self.redis.expire(ids,TTL2)
             return doc
 
+	def start_spool(self,name,callback):
+		qt = queue_thread(self,name,callback)
+		qt.setDaemon(True)
+		qt.start()
+		return qt
+	
+
 
 
 def callback(ch, method, properties, body):
@@ -180,3 +188,14 @@ def callback(ch, method, properties, body):
 def test(queue_name):
 	cq = couch_queue()
 	cq.run_queue(queue_name,callback)
+
+
+class queue_thread(threading.Thread):
+	def __init__(self,cq,queue_name,callback):
+		threading.Thread.__init__(self)
+		self.cq = cq
+		self.queue_name = queue_name
+		self.callback = callback
+	
+	def run(self):
+		self.cq.run_queue(self.queue_name,self.callback)

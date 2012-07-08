@@ -40,5 +40,6 @@ def callback(ch, method, properties, body):
 stl_dir = 'cache'
 render_dir = 'cache'
 
-cq = adapter.couch_queue()
-cq.run_queue('stl',callback)
+if __name__ == '__main__':
+	cq = adapter.couch_queue()
+	cq.run_queue('stl',callback)
