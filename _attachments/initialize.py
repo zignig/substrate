@@ -29,6 +29,6 @@ def callback(ch, method, properties, body):
 	ch.cq.save(cid,D)
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	
-
-cq = adapter.couch_queue()
-cq.run_queue('initialize',callback)
+if __name__ == "__main__":
+	cq = adapter.couch_queue()
+	cq.run_queue('initialize',callback)

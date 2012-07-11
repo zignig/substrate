@@ -37,5 +37,6 @@ def attachements(doc): #incomplete
 				ch.cq.message(i,'out')
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
-cq = adapter.couch_queue()
-cq.run_queue('changes',callback)
+if __name__ == "__main__":
+	cq = adapter.couch_queue()
+	cq.run_queue('changes',callback)

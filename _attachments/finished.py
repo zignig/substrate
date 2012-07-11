@@ -9,8 +9,12 @@ def callback(ch, method, properties, body):
 	D =  ch.cq.id(cid)
 	print('finished :'+cid)
 	D['robot_status'] = 'done'
-	ch.cq.write(cid,D)
+	try:
+		ch.cq.write(cid,D)
+	except:
+		print 'fail'
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
-cq = adapter.couch_queue()
-cq.run_queue('finished',callback)
+if __name__ == "__main__": 
+	cq = adapter.couch_queue()
+	cq.run_queue('finished',callback)

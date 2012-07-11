@@ -93,7 +93,7 @@ class couch_queue:
 
 
 	def run_queue(self,default_queue,callback):
-		print('running')
+		print('running '+default_queue)
 		# add the server to the queue for couch access
 		self.channel.couch = self.server
 		self.channel.cq = self
@@ -181,7 +181,7 @@ class couch_queue:
 
 
 
-def callback(ch, method, properties, body):
+def base_callback(ch, method, properties, body):
 	print ch,method,properties,body
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
