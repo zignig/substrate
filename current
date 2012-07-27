@@ -1,0 +1,75 @@
+{
+    "robot_version": 0.1, 
+    "redis_query": {
+        "status": "robot/status", 
+        "name": "robot/name", 
+        "author": "robot/author", 
+        "process": "robot/process", 
+        "tags": "robot/tag", 
+        "thingi_id": "robot/thingi_id", 
+        "derivative": "robot/derivative"
+    }, 
+    "status_states": {
+        "new": "pending", 
+        "running": "finished", 
+        "pending": "running"
+    }, 
+    "ttl": 3600, 
+    "_rev": "82-7cccca067b884c747cb870c67b62d18e", 
+    "mime_routing": {
+        "text/scad": "scad", 
+        "application/sla": "stl"
+    }, 
+    "broker": [
+        "gateway.terra"
+    ], 
+    "couch": [
+        "http://gateway.terra:5984/"
+    ], 
+    "mime_queues": {
+        "text/scad": [
+            "render_to_stl", 
+            "extract"
+        ], 
+        "application/sla": [
+            "thumbnail", 
+            "large", 
+            "rotational", 
+            "slice"
+        ]
+    }, 
+    "status_queue": {
+        "robot/status": {
+            "new": "initialize", 
+            "finished": "finished", 
+            "pending": "pending"
+        }, 
+        "robot/process": {
+            "download": "download", 
+            "author": "author"
+        }
+    }, 
+    "databases": [
+        "incoming"
+    ], 
+    "initialize": "robot/robot_status", 
+    "_id": "current", 
+    "queues": [
+        "stl", 
+        "scad", 
+        "incoming", 
+        "new", 
+        "assemble", 
+        "recycle", 
+        "finished", 
+        "pending", 
+        "classify", 
+        "initialize", 
+        "changes", 
+        "out", 
+        "error", 
+        "fetch", 
+        "slice"
+    ], 
+    "ttl_long": 86400
+}
