@@ -41,7 +41,8 @@ In this directory there is a file called current , this is the document that bui
 
 It looks kind of like this:
 
-{
+
+current = {
     "robot_version": 0.1, 
     "redis_query": {
         "status": "robot/status", 
@@ -170,7 +171,8 @@ these keys have a TTL and will disappear in good time (TTL in current).
 
 will yield 
 
-{
+
+doc = {
     "_id": "1637b134-d1f2-4181-8e21-3863e3325400", 
     "_rev": "5-b2c142c6d573de5b91376e069a5f52fd", 
     "author": "zignig", 
@@ -219,7 +221,7 @@ as a json object
 
 If you want to save a edited json file you can do it a couple of ways
 
->>cq.save(<doc>,<id>) 
+>>cq.save(doc,id) 
 
 will write the changes back to redis and add it to a dirty set
 
@@ -229,7 +231,7 @@ will  try so save back to the couchdb or fail and keep it dirty.
 
 OR 
 
-cq.write(<doc>,<id>)
+>>cq.write(doc,id)
 
 will write to the couchdb and delete the key even on a failed write.
 
