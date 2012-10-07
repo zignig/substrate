@@ -1,8 +1,8 @@
 {	
-	"server":"http://bl3dr.iriscouch.com/",
+	"server":"http://localhost:5984/",
 	"database":"servers",
 	"constructor":"current",
-	"broker_cred":["guest","123456"],
+	"broker_cred":["guest","guest"],
 	"redis":"localhost",
 	"author": "random_maker"
 }
