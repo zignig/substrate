@@ -36,4 +36,21 @@ def get_couch():
 				print('fail server '+r)
 	return s
 	
-b = get_couch()
+def add_replication(name,source):
+	return
+	
+
+#b = get_couch()
+local_c = couchdbkit.Server()
+print(local_c.info())
+print('set up replication')
+print('servers db')
+local_c.get_or_create_db('servers')
+local_c.replicate(remote+'/'+'servers','servers')
+print('incoming')
+local_c.get_or_create_db('incoming')
+rep_db = local_c['_replicator']
+if rep_db.doc_exist('bl3dr_incoming') == False:
+	incoming = {'_id':'bl3dr_incoming','source':'http://bl3dr.iriscouch.com//incoming','target':'incoming'}
+	rep_db.save_doc(incoming)
+
