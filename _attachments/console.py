@@ -7,3 +7,6 @@ readline.parse_and_bind('tab:complete')
 print('bl3dr console')
 cq = adapter.couch_queue()
 print('base object = cq')
+
+def go():
+	cq.spool(cq.author('zignig'))

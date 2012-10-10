@@ -56,7 +56,7 @@ class couch_queue:
 			current = self.server[conf['database']][conf['constructor']]
 			self.db = self.server[current['databases'][0]]
 			brokers = current['broker']
-			print(json.dumps(current,sort_keys=True,indent=4)) 
+			#print(json.dumps(current,sort_keys=True,indent=4)) 
 			self.config = current
 		except:
 			print("couchdb fail")
@@ -129,17 +129,21 @@ class couch_queue:
 		self.db.save_doc(doc)
 		self.redis.delete(ids)
 
+
+	def start(self,name):
+		self.channel.basic_publish('commands','spindle',name)
+
 	def id(self,id):
 		ids = 'id:'+id
 		if self.redis.exists(ids):
 		 	doc = json.loads(str(self.redis.get(ids)))
-			print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
+			#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
 			return doc 
 		else:
 			doc = self.db[id]
 			self.redis.set(ids,json.dumps(doc))
 			self.redis.expire(ids,TTL2)
-			print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
+			#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
 			self.redis.sadd('loaded',doc['_id'])
 			return doc	
 	
