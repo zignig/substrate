@@ -14,7 +14,9 @@ def callback(ch, method, properties, body):
 		for i in D['thingi_download']:
 			mess = {}
 			mess['_id'] = cid
+			mess['host'] = 'thingiverse.com'
 			mess['url'] = 'http://thingiverse.com'+i[0]
+			mess['path'] = i[0]
 			mess['name'] = i[1]
 			ch.basic_publish('','download',json.dumps(mess))
 	except :

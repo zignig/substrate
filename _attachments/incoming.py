@@ -9,8 +9,9 @@ def callback(ch, method, properties, body):
 	cid = ref['_id']
 	D =  ch.cq.id(cid)
 	ch.basic_ack(delivery_tag = method.delivery_tag)
-	print D['type']
-	ch.basic_publish('incoming',D['type'],json.dumps({'_id':cid}))
+	if 'type' in D:
+		print D['type']
+		ch.basic_publish('incoming',D['type'],json.dumps({'_id':cid}))
 
 
 if __name__ == "__main__":

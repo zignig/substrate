@@ -134,18 +134,23 @@ class couch_queue:
 		self.channel.basic_publish('commands','spindle',name)
 
 	def id(self,id):
-		ids = 'id:'+id
+		ids = 'id:'+str(id)
 		if self.redis.exists(ids):
 		 	doc = json.loads(str(self.redis.get(ids)))
 			#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
 			return doc 
 		else:
-			doc = self.db[id]
-			self.redis.set(ids,json.dumps(doc))
-			self.redis.expire(ids,TTL2)
-			#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
-			self.redis.sadd('loaded',doc['_id'])
-			return doc	
+			try:
+				doc = self.db[id]
+				self.redis.set(ids,json.dumps(doc))
+				self.redis.expire(ids,TTL2)
+				#print(doc['_id']+' : '+doc['name']+' by '+doc['author'])
+				self.redis.sadd('loaded',doc['_id'])
+				return doc	
+			except:
+				"do more if unavailble"
+				print "FAIL"
+				return 'fail'
 	
 		
 	def load(self,items):

@@ -1,4 +1,4 @@
-#!/usr/bin/python -i
+#!/usr/bin/python 
 import os,subprocess
 import pika,couchdbkit,json
 import yaml,adapter,traceback
@@ -27,8 +27,11 @@ spool_list = {
 cq = adapter.couch_queue()
 comm = cq.channel.queue_declare(exclusive=True)
 cq.channel.queue_bind(queue=comm.method.queue,exchange='commands',routing_key='spindle')
-def get():
-	return cq.channel.basic_get(queue=commands.method.queue)
+services = {
+	'queue':comm.method.queue,
+	'services':spool_list.keys()
+}
+cq.channel.basic_publish('commands','notify',json.dumps(services))
 
 def comm_callback(ch, method, properties, body):
 	print body
@@ -38,7 +41,7 @@ def comm_callback(ch, method, properties, body):
 		tmp_cq.start_spool(body,spool_list[body])
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	if body == 'die':
-		ch.stop_comsuming()
+		ch.stop_consuming()
 
 
 cq.run_queue(comm.method.queue,comm_callback)
