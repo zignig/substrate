@@ -19,7 +19,8 @@ print('bl3dr combined runner')
 spool_list = {
 	'download':downloads.callback,
 	'thingiverse':thing_fetch.callback,
-	'incoming':incoming.callback
+	'incoming':incoming.callback,
+	'stl':stl.callback
 }
 	
 

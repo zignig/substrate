@@ -4,26 +4,31 @@ import pika,couchdbkit,json
 import yaml,adapter,traceback,urllib2
 import socket
 
-timeout = 10
-#socket.setdefaulttimeout(timeout)
+timeout = 60
+socket.setdefaulttimeout(timeout)
 
 def grab(ch,D,ref):
 		req = urllib2.urlopen(ref['url'])
 		print ref['url']
-		#print req.info()
-		data = req.read()
-		#print len(data)
-		ch.cq.redis.delete('id:'+ref['_id'])
-		mime =  req.info()['Content-type']
-		#print mime
-		#print json.dumps(D,indent=4,sort_keys=True)	
-		name = 'cache/'+ref['name']
-		f = open(name,'w')
-		f.write(data)
-		f.close()
-		f = open(name)
-		ch.cq.db.put_attachment(D,f,ref['name'],req.info()['Content-type'])
-		f.close()
+		print req.info()
+		size = int(req.info()['Content-Length'])
+		if size < (1024*1024):
+			data = req.read()
+			#print len(data)
+			ch.cq.redis.delete('id:'+ref['_id'])
+			mime =  req.info()['Content-type']
+			#print mime
+			#print json.dumps(D,indent=4,sort_keys=True)	
+			name = 'cache/'+ref['name']
+			f = open(name,'w')
+			f.write(data)
+			f.close()
+			f = open(name)
+			D = ch.cq.id(ref['_id'])
+			ch.cq.db.put_attachment(D,f,ref['name'],req.info()['Content-type'])
+			f.close()
+		else:
+			print 'big'
 	
 def callback(ch, method, properties, body):
 	try:
