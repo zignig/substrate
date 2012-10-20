@@ -12,7 +12,7 @@ def grab(ch,D,ref):
 		print ref['url']
 		print req.info()
 		size = int(req.info()['Content-Length'])
-		if size < (1024*1024):
+		if size < (8*1024*1024):
 			data = req.read()
 			#print len(data)
 			ch.cq.redis.delete('id:'+ref['_id'])

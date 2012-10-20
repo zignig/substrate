@@ -6,7 +6,7 @@ import readline , rlcompleter
 readline.parse_and_bind('tab:complete')
 print('bl3dr console')
 cq = adapter.couch_queue()
-ttl = cq.config['ttl']
+ttl = 9600
 base_tag = 'walker:'
 
 m = cq.config['mime_routing']

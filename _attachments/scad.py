@@ -10,7 +10,7 @@ def callback(ch, method, properties, body):
 	ref = json.loads(body)
 	print ref	
 	cid = ref['id']
-	D = server['scad'][cid]
+	D = ch.cq.db[cid]
 	#print D
 	#D['robot_status'] = 'new'
 	#server['stl'].save_doc(D)
@@ -19,7 +19,7 @@ def callback(ch, method, properties, body):
 	print name
 	print cid,att
 	if att.split('.')[-1] == 'scad':
-		f = server['scad'].fetch_attachment(cid,att,stream=True)
+		f = ch.cq.db.fetch_attachment(cid,att,stream=True)
 		data = f.read()
 		f2 = open('cache/'+att,'wb')
 		f2.write(data)
@@ -30,8 +30,8 @@ def callback(ch, method, properties, body):
 		try:
 			subprocess.check_output(command.split())
 			attachment = open(render_dir+os.sep+name+'.stl').read()
-			server['scad'].put_attachment(D,attachment,name+'.stl','application/sla',headers={'processed':"true"})
-			server['scad'].save_doc(D)
+			ch.cq.db.put_attachment(D,attachment,name+'.stl','application/sla',headers={'processed':"true"})
+			ch.cq.db.save_doc(D)
 		except:
 			print "fail"
 	ch.basic_ack(delivery_tag = method.delivery_tag)

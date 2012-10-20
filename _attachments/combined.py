@@ -14,7 +14,6 @@ spool_list = [
 	('initialize',initialize.callback),
 	('pending',pending.callback),
 	('finished',finished.callback),
-	('stl',stl.callback),
 	('changes',changes.callback)
 	
 ]
