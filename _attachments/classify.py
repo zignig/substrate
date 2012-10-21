@@ -8,7 +8,9 @@ def callback(ch, method, properties, body):
 	server = ch.couch
 	ref = json.loads(body)
 	cid = ref['id']
-	D = ch.cq.id(cid)
+	ch.cq.redis.zincrby('mime_types',ref['value'][0],1)
+	#D = ch.cq.id(cid)
+	
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
 cq = adapter.couch_queue()

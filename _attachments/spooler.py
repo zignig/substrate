@@ -50,7 +50,7 @@ def enqueue_status():
 #cq.build()
 #cq.flush()
 #initilize('initialize')
-#queue_all('out')
+queue_all('out')
 #enqueue_status()
 while 1:
 	spool()

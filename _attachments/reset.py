@@ -13,8 +13,8 @@ def callback(ch, method, properties, body):
 	cid = ref['id']
 	print "reset :"+cid
 	D = ch.cq.id(cid) 
-	D['complete'] = False
-	D['type'] = 'thing'
+	#D['complete'] = False
+	#D['type'] = 'thing'
 #	if D.has_key('keywords'):
 #		D['tags'] = D['keywords']
 	if D.has_key('robot_status'):
