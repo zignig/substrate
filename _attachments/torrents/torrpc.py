@@ -11,3 +11,5 @@ for i in li:
 # a.d.start(id)
 # a.d.stop(id)
 # a.d.erase(id)
+# a.d.complete(id)
+# a.d.state(id)
