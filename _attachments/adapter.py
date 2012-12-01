@@ -3,6 +3,9 @@ import os,subprocess
 import pika,couchdbkit,json
 import yaml,pika,redis
 import threading
+import logging
+
+global log
 
 TTL = 9600 
 TTL2 = 86400 
@@ -95,6 +98,7 @@ class couch_queue:
 	def run_queue(self,default_queue,callback):
 		print('running '+default_queue)
 		# add the server to the queue for couch access
+		global log
 		self.channel.couch = self.server
 		self.channel.cq = self
 		self.channel.config = self.config
@@ -114,8 +118,8 @@ class couch_queue:
 			print('flushing queue '+i)
 			self.channel.queue_purge(queue=str(i))
 		
-	def message(self,mes,key='default'):
-		self.channel.basic_publish(exchange='', routing_key=key, body=mes)
+	def message(self,mes,key='default',ex=''):
+		self.channel.basic_publish(exchange=ex, routing_key=key, body=mes)
 	
 	def save(self,id,doc):
 		ids = 'id:'+id

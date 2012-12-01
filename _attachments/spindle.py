@@ -6,7 +6,7 @@ import readline , rlcompleter
 
 import stl,finished,initialize,pending
 import thing_fetch,incoming,downloads
-import changes
+import changes,logging
 
 readline.parse_and_bind('tab:complete')
 print('bl3dr combined runner')

@@ -1,0 +1,16 @@
+$def with (breadcrumb,the_list)
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>
+$for i in range(len(breadcrumb)):
+	$i<br>
+<hr>
+<ol>
+$for i in the_list:
+	<li><a href="$i">$i</li>
+</ol>
+</p>
+</body>
+</html>

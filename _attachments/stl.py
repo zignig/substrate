@@ -14,22 +14,22 @@ def callback(ch, method, properties, body):
 	D = ch.cq.cur_id(cid)
 	att = ref['value'][1]
 	name  = att.split('.')[0]
-	print ref 
+	#print ref 
 	if att.split('.')[-1] == 'stl':
-		print D
+		#print D
 		f = database.fetch_attachment(cid,att,stream=True)
 		data = f.read()
 		f2 = open('cache/'+att,'wb')
 		f2.write(data)
 		f2.close()
-		command = 'blender -b  utils' + os.sep + 'render.blend -P utils' + os.sep + 'viz.py -- ' + stl_dir + os.sep + att + ' ' + render_dir + os.sep + name + '.png'
+		command = 'blender -b  utils' + os.sep + 'render.blend -P utils' + os.sep + 'viz.py -- ' + stl_dir + os.sep + att + ' ' + render_dir + os.sep + name + '_l.png'
 		print(command)
 		try:
 			subprocess.check_output(command.split())
-			attachment = open(render_dir+os.sep+name+'.png')
- 			database.put_attachment(D,attachment,name+'.png','image/png')
+			attachment = open(render_dir+os.sep+name+'_l.png')
+	 		database.put_attachment(D,attachment,name+'_l.png','image/png')
 			# get doc again incas it has changed
-			D['thumb'] = name+'.png'
+			D['large'] = name+'.png'
 			D['updated_at'] = now()
 			database.save_doc(D)
 		except:

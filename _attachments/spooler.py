@@ -47,10 +47,10 @@ def enqueue_status():
 				spool_status(i,j[0],j[1])
 
 
-#cq.build()
-#cq.flush()
-#initilize('initialize')
+cq.build()
+cq.flush()
+initilize('initialize')
 queue_all('out')
-#enqueue_status()
+enqueue_status()
 while 1:
 	spool()

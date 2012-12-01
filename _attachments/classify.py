@@ -9,6 +9,7 @@ def callback(ch, method, properties, body):
 	ref = json.loads(body)
 	cid = ref['id']
 	ch.cq.redis.zincrby('mime_types',ref['value'][0],1)
+	ch.cq.redis.hset('classify',cid,ref)
 	#D = ch.cq.id(cid)
 	
 	ch.basic_ack(delivery_tag = method.delivery_tag)
