@@ -1,8 +1,8 @@
 {	
-	"server":"http://localhost:5984/",
+	"server":"http://substrate:5984/",
 	"database":"servers",
 	"constructor":"current",
 	"broker_cred":["guest","guest"],
 	"redis":"localhost",
-	"author": "random_maker"
+	"author": "zignig"
 }
