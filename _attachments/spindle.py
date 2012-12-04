@@ -4,10 +4,13 @@ import pika,couchdbkit,json
 import yaml,adapter,traceback
 import readline , rlcompleter
 
-import stl,finished,initialize,pending
-import frag_spooler
-import thing_fetch,incoming,downloads
-import changes,logging
+#import stl,finished,initialize,pending
+#import frag_spooler
+#import thing_fetch,incoming,downloads
+#import changes,logging
+from bobbins import downloads
+from bobbins import thing_fetch 
+from bobbins import incoming 
 
 readline.parse_and_bind('tab:complete')
 print('bl3dr combined runner')
@@ -21,11 +24,11 @@ spool_list = {
 	'download':downloads.callback,
 	'thingiverse':thing_fetch.callback,
 	'incoming':incoming.callback,
-	'stl':stl.callback,
-	'frag_spooler':frag_spooler.callback
+#	'stl':stl.callback,
+#	'frag_spooler':frag_spooler.callback
 }
 	
-
+threads = []
 
 cq = adapter.couch_queue()
 comm = cq.channel.queue_declare(exclusive=True)
@@ -41,7 +44,8 @@ def comm_callback(ch, method, properties, body):
 	if spool_list.has_key(body):
 		print 'spin up'
 		tmp_cq = adapter.couch_queue()
-		tmp_cq.start_spool(body,spool_list[body])
+		thr = tmp_cq.start_spool(body,spool_list[body])
+		cq.channel.basic_publish('commands','starting',json.dumps(thr.getName()))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	if body == 'die':
 		ch.stop_consuming()
