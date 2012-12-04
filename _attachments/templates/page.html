@@ -1,11 +1,15 @@
-$def with (breadcrumb,the_list)
+$def with (breadcrumb,the_list,reload)
 <!DOCTYPE html>
 <html>
+<head>
+$if reload:
+	<meta http-equiv="refresh" content="2">
+</head>
 <body>
 
 <p>
 $for i in range(len(breadcrumb)):
-	$i<br>
+	$breadcrumb[i]<br>
 <hr>
 <ol>
 $for i in the_list:

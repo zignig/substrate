@@ -3,9 +3,6 @@ import os,subprocess
 import pika,couchdbkit,json
 import yaml,pika,redis
 import threading
-import logging
-
-global log
 
 TTL = 9600 
 TTL2 = 86400 

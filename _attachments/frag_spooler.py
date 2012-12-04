@@ -12,16 +12,20 @@ def callback(ch, method, properties, body):
 	try:
 		ref = json.loads(body)
 		key = method.routing_key
-		print ref
 		if key == 'id':
+			ret = {}
 			doc = ch.cq.id(ref[1])
-			webdb.set('id:'+ref[1],json.dumps(doc['name']))
+			ret['name'] = doc['name']
+			if 'thumb' in doc:
+				ret['thumb'] = doc['thumb']
+			print ret
+			webdb.set('id:'+ref[1],json.dumps(ret))
 		else:
 			ret = ch.cq.queries[key](ref[1][1])
 			print ret
 			d = json.dumps([ref[1],ret])
-			webdb.set(ref[0],d)
-			webdb.expire(ref[0],10)
+			webdb.set('pending:'+ref[0],d)
+			webdb.expire('pending:'+ref[0],40)
 		#cid = ref['key']
 		#print("template : "+str(cid))
 		#D = ch.cq.id(cid) 

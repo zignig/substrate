@@ -5,6 +5,7 @@ import yaml,adapter,traceback
 import readline , rlcompleter
 
 import stl,finished,initialize,pending
+import frag_spooler
 import thing_fetch,incoming,downloads
 import changes,logging
 
@@ -20,7 +21,8 @@ spool_list = {
 	'download':downloads.callback,
 	'thingiverse':thing_fetch.callback,
 	'incoming':incoming.callback,
-	'stl':stl.callback
+	'stl':stl.callback,
+	'frag_spooler':frag_spooler.callback
 }
 	
 

@@ -31,7 +31,7 @@ cq.channel.queue_bind(queue='frag_'+'known',exchange='fragments',routing_key='id
 
 class index:
 	def GET(self):
-		return render.page(['/'],queries) 
+		return render.page(['/'],queries,False) 
 
 class ident:
 	def GET(self,name):
@@ -42,11 +42,15 @@ class base:
  def GET(self,name):
 	if webdb.exists('complete:'+name):
 		print 'cached '+name
-		page = json.loads(webdb.get('complete:'+name))
-		return render.page(page[0],page[1])
+		#page = json.loads(webdb.get('complete:'+name))
+		#return render.page(page[0],page[1],False)
+		return webdb.get('complete:'+name)
 	else:
-		#webdb.set(name,json.dumps([['pending'],['/'+name]]))
-		#webdb.expire(name,web_ttl)
+		if webdb.exists('pending:'+name):
+			page = json.loads(webdb.get('pending:'+name))
+		else:
+			webdb.set('pending:'+name,json.dumps([['pending'],['/'+name]]))
+			webdb.expire('pending:'+name,4)
 		tmp = name.split('/')
 		print tmp
 		if len(tmp) > 0:
@@ -57,26 +61,27 @@ class base:
 			else:
 				cq.message(json.dumps(tmp),key='unknown',ex='fragments')
 		time.sleep(0.5)
-		page = json.loads(webdb.get(name))
+		page = json.loads(webdb.get('pending:'+name))
 		breadcrumbs = page[0]
 		the_list = page[1]
 		pending = False
-		for i in range(len(the_list)):
-				if webdb.exists('id:'+the_list[i]):
-					cur = str(the_list[i])
-					the_list[i] = webdb.get('id:'+cur)
-				else:
-					pending = True
-					webdb.set('id:'+the_list[i],json.dumps([['pending'],[the_list[i]]]))
-					webdb.expire('id:'+the_list[i],web_ttl)
-					cq.message(json.dumps(['id',the_list[i]]),key='id',ex='fragments')
+		print breadcrumbs
+		if len(breadcrumbs) >= 1:
+			for i in range(len(the_list)):
+					if webdb.exists('id:'+the_list[i]):
+						cur = str(the_list[i])
+						the_list[i] = webdb.get('id:'+cur)
+					else:
+						pending = True
+						webdb.set('id:'+the_list[i],json.dumps([['pending'],[the_list[i]]]))
+						webdb.expire('id:'+the_list[i],web_ttl)
+						cq.message(json.dumps(['id',the_list[i]]),key='id',ex='fragments')
 		if pending:
-			return render.page(breadcrumbs,the_list)
+			return render.page(breadcrumbs,the_list,True)
 		else:
-			data = json.dumps([breadcrumbs,the_list])
-			print 'should be saving' 
-			webdb.set('complete:'+name,"test")
-			return render.page(breadcrumbs,the_list)
+			webdb.set('complete:'+name,render.page(breadcrumbs,the_list,False))
+			webdb.expire('complete:'+name,86400)
+			return render.page(breadcrumbs,the_list,False)
 			
 
 if __name__ == "__main__":
