@@ -32,12 +32,12 @@ threads = []
 
 cq = adapter.couch_queue()
 comm = cq.channel.queue_declare(exclusive=True)
-cq.channel.queue_bind(queue=comm.method.queue,exchange='commands',routing_key='spindle')
+cq.channel.queue_bind(queue=comm.method.queue,exchange='command',routing_key='spindle')
 services = {
 	'queue':comm.method.queue,
 	'services':spool_list.keys()
 }
-cq.channel.basic_publish('commands','notify',json.dumps(services))
+cq.channel.basic_publish('command','notify',json.dumps(services))
 
 def comm_callback(ch, method, properties, body):
 	print body
@@ -45,7 +45,7 @@ def comm_callback(ch, method, properties, body):
 		print 'spin up'
 		tmp_cq = adapter.couch_queue()
 		thr = tmp_cq.start_spool(body,spool_list[body])
-		cq.channel.basic_publish('commands','starting',json.dumps(thr.getName()))
+		cq.channel.basic_publish('command','starting',json.dumps(thr.getName()))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	if body == 'die':
 		ch.stop_consuming()

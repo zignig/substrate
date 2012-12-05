@@ -39,8 +39,8 @@ if __name__ == "__main__":
 	cq = adapter.couch_queue()
 	build_exchanges(cq)
 	cq.redis.hincrby('bobbin','download',2)
-	#cq.redis.hincrby('bobbin','incoming',2)
-	#cq.redis.hincrby('bobbin','thingiverse',2)
+	cq.redis.hincrby('bobbin','incoming',2)
+	cq.redis.hincrby('bobbin','thingiverse',2)
 	#cq.redis.hincrby('bobbin','stl',2)
 	
 	cq.run_queue('notify',callback)
