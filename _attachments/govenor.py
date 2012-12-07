@@ -5,6 +5,23 @@ import yaml,adapter,traceback
 
 def callback(ch, method, properties, body):
 	ref = json.loads(body)
+	# hanlde spindle commands
+	if ref.keys()[0] == 'spindle':
+		comm = ref['spindle']
+		if 'queue' in comm.keys():
+			queue = comm['queue']
+		if 'services' in comm.keys():
+			for i in comm['services']:
+				print i
+				# just start one of each
+				cq.channel.basic_publish('',queue,i)
+	# handle bobbin
+	if ref.keys()[0] == 'bobbin':
+		print ref
+	ch.basic_ack(delivery_tag = method.delivery_tag)
+
+def old_callback(ch, method, properties, body):
+	ref = json.loads(body)
 	print ref
 	print cq.redis.hgetall('bobbin')
 	for i in ref['services']:
@@ -37,7 +54,7 @@ def build_exchanges(cq,sumpex='sump'):
 	
 if __name__ == "__main__":
 	cq = adapter.couch_queue()
-	build_exchanges(cq)
+	#build_exchanges(cq)
 	cq.redis.hincrby('bobbin','download',2)
 	cq.redis.hincrby('bobbin','incoming',2)
 	cq.redis.hincrby('bobbin','thingiverse',2)

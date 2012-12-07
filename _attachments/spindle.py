@@ -2,7 +2,7 @@
 import os,subprocess
 import pika,couchdbkit,json
 import yaml,adapter,traceback
-import readline , rlcompleter
+import readline , rlcompleter , uuid
 
 #import stl,finished,initialize,pending
 #import frag_spooler
@@ -37,18 +37,21 @@ services = {
 	'queue':comm.method.queue,
 	'services':spool_list.keys()
 }
-cq.channel.basic_publish('command','notify',json.dumps(services))
+cq.channel.basic_publish('command','notify',json.dumps({'spindle':services}))
 
+threads = {}
 def comm_callback(ch, method, properties, body):
 	print body
 	if spool_list.has_key(body):
 		print 'spin up'
 		tmp_cq = adapter.couch_queue()
-		thr = tmp_cq.start_spool(body,spool_list[body])
-		cq.channel.basic_publish('command','starting',json.dumps(thr.getName()))
+		thread_id = uuid.uuid4()
+		threads[thread_id] = tmp_cq
+		tmp_cq.start_spool(body,spool_list[body])
+		cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(thread_id),'name':body}}))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
+	print threads
 	if body == 'die':
 		ch.stop_consuming()
-
 
 cq.run_queue(comm.method.queue,comm_callback)

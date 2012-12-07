@@ -6,6 +6,7 @@ import threading
 
 TTL = 9600 
 TTL2 = 86400 
+
 class redis_query:
 	" redis query abstraction"
 	def __init__(self,database,redis,name,query):
@@ -132,7 +133,7 @@ class couch_queue:
 
 
 	def start(self,name):
-		self.channel.basic_publish('commands','spindle',name)
+		self.channel.basic_publish('command','spindle',name)
 
 	def id(self,id):
 		ids = 'id:'+str(id)
