@@ -35,9 +35,15 @@ def get_subnet(subnet):
 	return host_list
 
 def get_host(host):
-	print host
 	doc = commands.getoutput('nmap -T insane -oX - '+host[0])
 	dom = xml.dom.minidom.parseString(doc)
+	ports = dom.getElementsByTagName("port")	
+	port_list = []
+	for i in ports:
+		val = i.getAttribute('portid')
+		port_list.append(val)
+	return port_list
+	
 
 def callback(ch, method, properties, body):
 	try:
@@ -51,7 +57,8 @@ def callback(ch, method, properties, body):
 				ch.basic_publish('','mapping',json.dumps(i))
 				print i
 		if 'host' in ref.keys():
-			get_host(ref['host'])
+			h = get_host(ref['host'])
+			print h
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 	
 	except:

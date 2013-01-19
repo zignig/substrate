@@ -9,7 +9,7 @@ cq = adapter.couch_queue()
 print('base object = cq')
 
 def go():
-	cq.spool(cq.author('zignig'))
+	cq.spool(cq.author(cq.local_config['author']))
 
 author = cq.author
 tags = cq.tags

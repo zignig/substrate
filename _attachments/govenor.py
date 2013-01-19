@@ -6,6 +6,7 @@ import yaml,adapter,traceback
 def callback(ch, method, properties, body):
 	ref = json.loads(body)
 	# hanlde spindle commands
+	print ref	
 	if ref.keys()[0] == 'spindle':
 		comm = ref['spindle']
 		if 'queue' in comm.keys():
@@ -18,6 +19,8 @@ def callback(ch, method, properties, body):
 	# handle bobbin
 	if ref.keys()[0] == 'bobbin':
 		print ref
+		comm = ref['bobbin']
+		ch.cq.redis.hincrby('bobbin',comm['name'])
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
 def old_callback(ch, method, properties, body):
@@ -52,11 +55,20 @@ def build_exchanges(cq,sumpex='sump'):
 			cq.channel.queue_declare(queue=j)
 			cq.channel.queue_bind(queue=j,exchange=i,routing_key=j)
 	
+def mime_types(cq):
+	mt = cq.db.view('robot/mime_types',group=True).all()
+	for i in mt:
+		print i
+		mtype = 'mime_type:'+i['key']
+		cq.channel.queue_declare(queue=mtype)
+		cq.channel.queue_bind(queue=mtype,exchange='mime_types',routing_key=mtype)	
+
 if __name__ == "__main__":
 	cq = adapter.couch_queue()
-	#build_exchanges(cq)
+	build_exchanges(cq)
+	mime_types(cq)
 	cq.redis.hincrby('bobbin','download',2)
-	cq.redis.hincrby('bobbin','incoming',2)
+	cq.redis.hincrby('bobbin','incoming',3)
 	cq.redis.hincrby('bobbin','thingiverse',2)
 	#cq.redis.hincrby('bobbin','stl',2)
 	

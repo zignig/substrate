@@ -50,7 +50,6 @@ def comm_callback(ch, method, properties, body):
 		tmp_cq.start_spool(body,spool_list[body])
 		cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(thread_id),'name':body}}))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
-	print threads
 	if body == 'die':
 		ch.stop_consuming()
 
