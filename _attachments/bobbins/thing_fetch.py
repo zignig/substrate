@@ -18,7 +18,7 @@ def callback(ch, method, properties, body):
 			mess['url'] = 'http://thingiverse.com'+i[0]
 			mess['path'] = i[0]
 			mess['name'] = i[1]
-			ch.basic_publish('','download',json.dumps(mess))
+			ch.basic_publish('incoming','download',json.dumps(mess))
 		ch.basic_publish('','initialize',body)
 	except :
 		print 'error'

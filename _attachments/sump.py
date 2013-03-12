@@ -8,8 +8,12 @@ k = proc['sump'].keys()
 current_set =  {}
 
 def callback(ch, method, properties, body):
-	ref = json.loads(body)
-	print ref 
+	try:
+		ref = json.loads(body)
+	except:
+		ch.basic_ack(delivery_tag = method.delivery_tag)
+		return
+	print method.routing_key,k,ref
 	if 'ttl' in ref:
 		ref['ttl'] = ref['ttl'] - 1
 		if ref['ttl'] == 0:
@@ -23,12 +27,13 @@ def callback(ch, method, properties, body):
 		bl_ref = proc['sump'][key]
 		print method.routing_key
 		if key in current_set:
-			cq.message(json.dumps(ref),bl_ref,'incoming')
+			cq.message(json.dumps(ref),key,'incoming')
 		else:
 			print 'building and binding '+bl_ref
 			ch.queue_declare(queue=bl_ref)
 			ch.queue_bind(queue=bl_ref,exchange='incoming',routing_key=key)
 			cq.message(json.dumps(ref),key,'incoming')
+			ch.basic_publish('command','spindle',key)
 			current_set[bl_ref] = True
 	#if '_id' in ref:
 	#	doc = cq.id(ref['_id'])
@@ -56,9 +61,9 @@ def gen_exchanges():
 	cq.channel.exchange_declare(exchange='incoming',exchange_type='topic',arguments={'alternate-exchange':'sump'}) 
 	cq.channel.exchange_declare(exchange='sump',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
 	cq.channel.exchange_declare(exchange='fail',exchange_type='fanout',arguments={}) 
-	cq.channel.exchange_declare(exchange='commands',exchange_type='topic',arguments={}) 
-	cq.channel.queue_declare(queue='commands')
-	cq.channel.queue_bind(queue='commands',exchange='commands',routing_key='*')
+	cq.channel.exchange_declare(exchange='command',exchange_type='topic',arguments={}) 
+	cq.channel.queue_declare(queue='command')
+	cq.channel.queue_bind(queue='command',exchange='command',routing_key='*')
 	cq.channel.queue_declare(queue='sump_spool')
 	cq.channel.queue_bind(queue='sump_spool',exchange='sump',routing_key='*')
 	
