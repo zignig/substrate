@@ -116,7 +116,7 @@ class couch_queue:
 			print('flushing queue '+i)
 			self.channel.queue_purge(queue=str(i))
 		
-	def message(self,mes,key='default',ex=''):
+	def message(self,mes,key='default',ex='incoming'):
 		self.channel.basic_publish(exchange=ex, routing_key=key, body=mes)
 	
 	def save(self,id,doc):
@@ -161,7 +161,7 @@ class couch_queue:
 	
 	def spool(self,items):
 		for i in items:
-			self.message(json.dumps({'_id':i}),'incoming')
+			self.message(json.dumps({'_id':i}),'incoming','incoming')
 
 	def sync(self):
 		if self.redis.exists('dirty'):

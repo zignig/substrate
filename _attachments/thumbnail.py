@@ -11,13 +11,14 @@ size = (200,150)
 #size = (80,60)
 
 def process_image(val):
+	doc = cq.db.get(val['id'])
 	r = cq.db.fetch_attachment(val['id'],val['value'])
 	image = Image.open(StringIO.StringIO(r))
 	print image.size
 	if image.size[0] > 200:
 		image.thumbnail(size,Image.ANTIALIAS)
-		doc = cq.db.get(val['id'])
 		doc['thumb'] = 'thumb.jpg'
+		doc['robot_status'] = 'done'
 		b = cq.db.save_doc(doc)
 		data = StringIO.StringIO()
 		image.save(data,"JPEG")
@@ -51,4 +52,4 @@ def grab():
 	
 if __name__ == "__main__":
 	cq = adapter.couch_queue()
-	cq.run_queue('mime_type:image/png',callback)
+	cq.run_queue('mime_type:image/jpeg',callback)

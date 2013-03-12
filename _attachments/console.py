@@ -7,7 +7,7 @@ readline.parse_and_bind('tab:complete')
 print('bl3dr console')
 cq = adapter.couch_queue()
 print('base object = cq')
-
+proc = yaml.load(open('process.yaml').read())
 def go():
 	cq.spool(cq.author(cq.local_config['author']))
 

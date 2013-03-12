@@ -1,0 +1,16 @@
+sump:
+  incoming: incoming
+  load: loader
+  thingi_id: thingiverse
+  query: query
+  type: type_router
+  checker: check_runner
+loader:
+  download: test
+checker:
+  manifold: maninfoldiness
+type_router:
+  thing: thing_spool
+  thinigverse: thing
+  collection: coll
+  replica: replication
