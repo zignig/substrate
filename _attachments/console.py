@@ -13,6 +13,13 @@ def go():
 
 author = cq.author
 tags = cq.tags
+# generate process magic
+base = adapter.empty()
+for i in proc.keys():
+	ex = adapter.empty()
+	base.__dict__[i] = ex
+	for j in proc[i]:
+		ex.__dict__[j] = adapter.item(cq,i,j)
 
 def split_author(name):
 	ids = cq.author(name)

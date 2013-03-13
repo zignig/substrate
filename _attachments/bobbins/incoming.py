@@ -11,7 +11,7 @@ def callback(ch, method, properties, body):
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	if 'type' in D:
 		print D['type']
-		ch.basic_publish('incoming',D['type'],json.dumps({'_id':cid}))
+		ch.basic_publish('type_router',D['type'],json.dumps({'_id':cid}))
 
 
 if __name__ == "__main__":

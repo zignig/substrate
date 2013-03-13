@@ -192,6 +192,21 @@ class couch_queue:
 
 
 
+class item:
+	def __init__(self,cq,exchange,key):
+		self.exchange = exchange
+		self.key = key
+		self.cq = cq
+
+	def __call__(self,message):
+		self.cq.channel.basic_publish(self.exchange,self.key,json.dumps(message))
+
+	def send(self,message):
+		self.cq.channel.basic_publish(self.exchange,self.key,json.dumps(message))
+		
+class empty:
+	def __init__(self):
+		pass
 def base_callback(ch, method, properties, body):
 	print ch,method,properties,body
 	ch.basic_ack(delivery_tag = method.delivery_tag)
