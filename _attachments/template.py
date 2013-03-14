@@ -33,4 +33,4 @@ def callback(ch, method, properties, body):
 	
 if __name__ == "__main__":
 	cq = adapter.couch_queue()
-	cq.run_queue('frag_known',callback)
+	cq.run_queue('out',callback)

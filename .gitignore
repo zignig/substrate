@@ -3,6 +3,7 @@
 *.blend2
 .couchapprc
 config.yaml
+_attachments/config.json
 build/
 cache/
 thingiverse_cache/

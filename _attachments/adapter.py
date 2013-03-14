@@ -133,7 +133,7 @@ class couch_queue:
 
 
 	def start(self,name):
-		self.channel.basic_publish('command','spindle',name)
+		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':name}))
 
 	def id(self,id):
 		ids = 'id:'+str(id)
@@ -198,7 +198,7 @@ class item:
 		self.key = key
 		self.cq = cq
 
-	def __call__(self,message):
+	def __call__(self,message={}):
 		self.cq.channel.basic_publish(self.exchange,self.key,json.dumps(message))
 
 	def send(self,message):

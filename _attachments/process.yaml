@@ -1,16 +1,36 @@
-sump:
+incoming:
   incoming: incoming
   load: loader
+  changes: changes
   thingi_id: thingiverse
   query: query
   type: type_router
+  download: download
   checker: check_runner
-loader:
-  download: test
+query:
+  query: search_engine
+render:
+  stl: stl
+  thumbnail: thumbnail
+  animation: spin
+publish:
+  database: database
+  thing: publish_thing
+status:
+  new: new_thing
+  complete: complete_thing
+  pending: pending_thing
 checker:
   manifold: maninfoldiness
 type_router:
   thing: thing_spool
-  thinigverse: thing
+  thingiverse: thing
   collection: coll
   replica: replication
+  git: clone_update
+command:
+  start: substrate_starter
+  stop: substrate_stopper
+  schedule: scheduler
+  notify: governor
+  spindle: spindle 

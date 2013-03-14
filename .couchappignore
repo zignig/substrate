@@ -4,8 +4,5 @@
   // ".*~$"
   // ".*\\.swp$"
   // ".*\\.bak$"
-  "config.yaml",
-  ".*\\.pyc$",
-  "cache",
-  "thingiverse_cache"
+ "cache/*"
 ]

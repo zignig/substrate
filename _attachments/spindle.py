@@ -42,15 +42,22 @@ cq.channel.basic_publish('command','notify',json.dumps({'spindle':services}))
 threads = {}
 def comm_callback(ch, method, properties, body):
 	print body
-	if spool_list.has_key(body):
-		print 'spin up'
-		tmp_cq = adapter.couch_queue()
-		thread_id = uuid.uuid4()
-		threads[thread_id] = tmp_cq
-		tmp_cq.start_spool(body,spool_list[body])
-		cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(thread_id),'name':body}}))
-	ch.basic_ack(delivery_tag = method.delivery_tag)
-	if body == 'die':
-		ch.stop_consuming()
+	try:
+		ref = json.loads(body)
+	except:
+		print body + ' not json'
+		ch.basic_ack(delivery_tag = method.delivery_tag)
+		return
+	if 'bobbin' in ref:
+		if spool_list.has_key(ref['bobbin']):
+			print 'spin up'
+			tmp_cq = adapter.couch_queue()
+			thread_id = uuid.uuid4()
+			threads[thread_id] = tmp_cq
+			tmp_cq.start_spool(ref['bobbin'],spool_list[ref['bobbin']])
+			cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(thread_id),'name':body}}))
+		ch.basic_ack(delivery_tag = method.delivery_tag)
+		if ref['bobbin'] == 'die':
+			ch.stop_consuming()
 
 cq.run_queue(comm.method.queue,comm_callback)

@@ -32,17 +32,18 @@ def callback(ch, method, properties, body):
 		print '==> '+exchange
 		if routing_key in proc[exchange]:
 			print '===> '+routing_key
-			if routing_key in current_set:
+			if cq.redis.exists('recent:'+routing_key):
 				cq.message(json.dumps(ref),routing_key,exchange)
 			else:
 				print 'binding '+exchange+'->'+routing_key
-				ch.queue_declare(queue=routing_key)
+				ch.queue_declare(queue=routing_key,arguments={'x-expires':30000})
 				ch.queue_bind(queue=routing_key,exchange=exchange,routing_key=routing_key)
 				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
 				cq.message(json.dumps(ref),routing_key,exchange)
 				print 'sending start to '+routing_key
-				ch.basic_publish('command','spindle',routing_key)
-				current_set[routing_key] = True
+				ch.basic_publish('command','spindle',json.dumps({'bobbin':routing_key}))
+				cq.redis.set('recent:'+routing_key,'')
+				cq.redis.expire('recent:'+routing_key,30)
 				print current_set
 		else:
 			print 'unknown key '+routing_key
@@ -88,10 +89,6 @@ def gen_exchanges():
 	cq.channel.exchange_declare(exchange='fail',exchange_type='fanout',arguments={}) 
 	cq.channel.queue_declare(queue='sump_spool')
 	cq.channel.queue_bind(queue='sump_spool',exchange='sump',routing_key='*')
-	print 'building command spool'
-	cq.channel.exchange_declare(exchange='command',exchange_type='topic',arguments={}) 
-	cq.channel.queue_declare(queue='command')
-	cq.channel.queue_bind(queue='command',exchange='command',routing_key='*')
 	print 'building top level exchanges'
 	for i in proc.keys():
 		print 'primary exchange '+i

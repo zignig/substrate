@@ -65,8 +65,8 @@ def mime_types(cq):
 
 if __name__ == "__main__":
 	cq = adapter.couch_queue()
-	build_exchanges(cq)
-	mime_types(cq)
+	#build_exchanges(cq)
+	#mime_types(cq)
 	cq.redis.hincrby('bobbin','download',2)
 	cq.redis.hincrby('bobbin','incoming',3)
 	cq.redis.hincrby('bobbin','thingiverse',2)
