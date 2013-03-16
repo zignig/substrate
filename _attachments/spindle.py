@@ -9,6 +9,7 @@ import readline , rlcompleter , uuid
 #import thing_fetch,incoming,downloads
 #import changes,logging
 from bobbins import downloads
+from bobbins import stl 
 from bobbins import thing_fetch 
 from bobbins import incoming 
 
@@ -24,7 +25,7 @@ spool_list = {
 	'download':downloads.callback,
 	'thingiverse':thing_fetch.callback,
 	'incoming':incoming.callback,
-#	'stl':stl.callback,
+	'stl':stl.callback,
 #	'frag_spooler':frag_spooler.callback
 }
 	
@@ -56,7 +57,11 @@ def comm_callback(ch, method, properties, body):
 			threads[thread_id] = tmp_cq
 			tmp_cq.start_spool(ref['bobbin'],spool_list[ref['bobbin']])
 			cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(thread_id),'name':body}}))
-		ch.basic_ack(delivery_tag = method.delivery_tag)
+			ch.basic_ack(delivery_tag = method.delivery_tag)
+		else:
+			ch.basic_ack(delivery_tag = method.delivery_tag)
+			cq.channel.basic_publish('error','error',json.dumps({'error':body}))
+
 		if ref['bobbin'] == 'die':
 			ch.stop_consuming()
 

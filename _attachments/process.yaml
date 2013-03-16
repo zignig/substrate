@@ -3,10 +3,7 @@ incoming:
   load: loader
   changes: changes
   thingi_id: thingiverse
-  query: query
-  type: type_router
   download: download
-  checker: check_runner
 query:
   query: search_engine
 render:
@@ -23,14 +20,16 @@ status:
 checker:
   manifold: maninfoldiness
 type_router:
-  thing: thing_spool
-  thingiverse: thing
+  thing: thing
+  thingiverse: thingiverse
   collection: coll
   replica: replication
   git: clone_update
 command:
-  start: substrate_starter
-  stop: substrate_stopper
+  start: commander 
+  stop: commander 
   schedule: scheduler
-  notify: governor
+  notify: govenor
   spindle: spindle 
+error:
+  error: dev_error
