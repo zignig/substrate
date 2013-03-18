@@ -3,7 +3,7 @@ incoming:
   load: loader
   changes: changes
   thingi_id: thingiverse
-  download: download
+  download: downloads
 query:
   query: search_engine
 render:
@@ -21,7 +21,7 @@ checker:
   manifold: maninfoldiness
 type_router:
   thing: thing
-  thingiverse: thingiverse
+  thingiverse: thing_fetch 
   collection: coll
   replica: replication
   git: clone_update

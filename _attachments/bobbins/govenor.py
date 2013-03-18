@@ -67,9 +67,8 @@ if __name__ == "__main__":
 	cq = adapter.couch_queue()
 	#build_exchanges(cq)
 	#mime_types(cq)
+	cq.channel.basic_publish('command','notify',json.dumps({'spindle':'gov','keys':[]}))
 	cq.redis.hincrby('bobbin','download',2)
 	cq.redis.hincrby('bobbin','incoming',3)
 	cq.redis.hincrby('bobbin','thingiverse',2)
-	#cq.redis.hincrby('bobbin','stl',2)
-	
 	cq.run_queue('govenor',callback)

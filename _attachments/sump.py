@@ -70,4 +70,6 @@ def gen_exchanges():
 if __name__ == "__main__":
 	cq = adapter.couch_queue()
 	gen_exchanges()
+	cq.channel.basic_publish('command','start',json.dumps({'base':'start'}))
+	cq.channel.basic_publish('error','error',json.dumps({'base':'start'}))
 	cq.run_queue('sump_spool',callback)
