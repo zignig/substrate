@@ -54,7 +54,7 @@ def callback(ch, method, properties, body):
 			print ref['subnet'] 
 			hosts = get_subnet(ref['subnet'])
 			for i in hosts:
-				ch.basic_publish('','mapping',json.dumps(i))
+				ch.basic_publish('network','mapping',json.dumps(i))
 				print i
 		if 'host' in ref.keys():
 			h = get_host(ref['host'])

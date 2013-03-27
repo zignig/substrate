@@ -8,9 +8,13 @@ def now():
 
 def callback(ch, method, properties, body):
 	ref = json.loads(body)
+	print ref
 	cid = ref['_id']
 	D = ch.cq.cur_id(cid)
-	print D
+	if '_attachments' in D:
+		li = D['_attachments']
+		for i in li:
+			print i
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
 if __name__ == "__main__":

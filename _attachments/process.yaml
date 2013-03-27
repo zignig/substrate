@@ -1,9 +1,11 @@
 incoming:
   incoming: incoming
+  build : builder 
   load: loader
   changes: changes
   thingi_id: thingiverse
   download: downloads
+  process: process
 query:
   query: search_engine
 render:
@@ -25,6 +27,27 @@ type_router:
   collection: coll
   replica: replication
   git: clone_update
+mime_type:
+  application/sla: stl
+  image/jpeg: thumbnail
+  application/octet-stream: classify
+  image/svg+xml: svg_proc
+  image/png: thumbnail
+  image/gif: thumbnail
+  image/tiff: later
+  text/scad: openscad
+  application/pdf: later
+  model/x-pov: later
+  image/x-eps: later
+  video/mp4: later
+  application/zip: compressed 
+  application/x-tar: compressed 
+  application/rar: compressed
+  application/x-rar-compressed: compressed
+  application/coreldraw: later 
+  application/postscript: later
+
+  text/plain: later
 command:
   start: commander 
   stop: commander 
@@ -33,3 +56,7 @@ command:
   spindle: spindle 
 error:
   error: dev_error
+network:
+  mapping: nmapper
+rpc:
+  rpc_test: rpc_test

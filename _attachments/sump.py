@@ -39,18 +39,19 @@ def callback(ch, method, properties, body):
 				cq.message(json.dumps(ref),routing_key,exchange)
 			else:
 				print 'binding '+exchange+'->'+target_spool
-				ch.queue_declare(queue=target_spool,arguments={'x-expires':30000})
+				#ch.queue_declare(queue=target_spool,arguments={'x-expires':50000})
+				ch.queue_declare(queue=target_spool,arguments={'x-expires':5000})
 				ch.queue_bind(queue=target_spool,exchange=exchange,routing_key=routing_key)
 				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
 				cq.message(json.dumps(ref),routing_key,exchange)
-				print 'sending start to '+routing_key
+				print 'sending start to '+target_spool
 				ch.basic_publish('command','spindle',json.dumps({'bobbin':target_spool}))
+				ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
 				cq.redis.set('recent:'+routing_key,'')
 				cq.redis.expire('recent:'+routing_key,30)
-				print current_set
 		else:
 			print 'unknown key '+routing_key
-			ch.basic_publish('error','error',json.dumps({'error':ref}))
+			ch.basic_publish('error','error',json.dumps({'error':ref,'routing_key':routing_key}))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
 def gen_exchanges():

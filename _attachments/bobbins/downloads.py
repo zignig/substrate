@@ -12,7 +12,7 @@ def grab(ch,D,ref):
 		print ref['url']
 		print req.info()
 		size = int(req.info()['Content-Length'])
-		if size < (8*1024*1024):
+		if size < (30*1024*1024):
 			data = req.read()
 			#print len(data)
 			ch.cq.redis.delete('id:'+ref['_id'])
@@ -31,23 +31,38 @@ def grab(ch,D,ref):
 			print 'big'
 	
 def callback(ch, method, properties, body):
+	# faker for some tests
 	try:
 		ref = json.loads(body)
+		print 'downloads '+ body
 		cid = ref['_id']
 		D = ch.cq.id(cid) 
 		if '_attachments' in D:
 			att = D['_attachments']
 			if att.has_key(ref['name']):
-				print 'alread got '+ref['name']
-				#grab(ch,D,ref)
+				print 'alread have file '+ref['name']
 			else:
 				grab(ch,D,ref)
+			# check if all attachments have been downloaded 
+			count = 0
+			downloads = D['thingi_download']
+			for i in downloads:
+				if i[1] in att:
+					count = count + 1
+			if count == len(downloads):
+				print 'mark finished'
+				D['thing_fetched'] = True
+				ch.cq.redis.delete('id:'+ref['_id'])
+				ch.cq.db.save_doc(D)
 		else:
 			grab(ch,D,ref)
+		
 	except:
+		D['fail'] = True
+		ch.cq.redis.delete('id:'+ref['_id'])
+		ch.cq.db.save_doc(D)
 		tb = traceback.format_exc()
 		print tb
-		#ch.basic_publish('','error',body+'\n\n'+str(tb))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	
 if __name__ == "__main__":
