@@ -32,6 +32,17 @@ def grab(ch,D,ref):
 	
 def callback(ch, method, properties, body):
 	# faker for some tests
+	ref = json.loads(body)
+	print 'downloads '+ body
+	cid = ref['_id']
+	D = ch.cq.id(cid) 
+	print 'mark finished'
+	D['thing_fetched'] = True
+	ch.cq.redis.delete('id:'+ref['_id'])
+	ch.cq.db.save_doc(D)
+	ch.basic_ack(delivery_tag = method.delivery_tag)
+	return
+	# end faker
 	try:
 		ref = json.loads(body)
 		print 'downloads '+ body

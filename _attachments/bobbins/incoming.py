@@ -10,13 +10,18 @@ def callback(ch, method, properties, body):
 		cid = ref['_id']
 		D =  ch.cq.id(cid)
 		ch.basic_ack(delivery_tag = method.delivery_tag)
-		if 'robot_status' in D:
-			print D['robot_status']
+		#if 'robot_status' in D:
+		#	if D['robot_status'] == 'done':
+		#		return
+		##	print D['robot_status']
+		#else:
+		#	ch.basic_publish('incoming','new',json.dumps({'_id':cid}))
+		#	return
 		if 'fail' in D:
 			print 'fail '+str(D)
 			return
 		if 'type' in D:
-			print D['type']
+			#print D['type']
 			ch.basic_publish('type_router',D['type'],json.dumps({'_id':cid}))
 
 

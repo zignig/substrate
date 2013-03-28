@@ -7,6 +7,10 @@ def now():
     return  datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%Sz')
 
 def callback(ch, method, properties, body):
+	print 'stl '+body
+	ch.basic_ack(delivery_tag = method.delivery_tag)
+	return 
+
 	server = ch.couch
 	database = ch.cq.db
 	ref = json.loads(body)

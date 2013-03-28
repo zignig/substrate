@@ -17,12 +17,12 @@ def callback(ch, method, properties, body):
 	ref = json.loads(body)
 	cid = ref['_id']
 	D = ch.cq.id(cid) 
-	if 'name' in D:
-		print 'process ' + D['name']
+	#if 'name' in D:
+		#print 'process ' + D['name']
 	if '_attachments' in D:
 		att = D['_attachments']
 		for i in att:
-			print '\t'+i+' = '+str(att[i]['content_type'])
+			#print '\t'+i+' = '+str(att[i]['content_type'])
 			ch.basic_publish('mime_type',att[i]['content_type'],json.dumps({'name':i}))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	

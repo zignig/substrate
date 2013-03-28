@@ -6,6 +6,7 @@ incoming:
   thingi_id: thingiverse
   download: downloads
   process: process
+  reset: reset
 query:
   query: search_engine
 render:
@@ -38,6 +39,7 @@ mime_type:
   text/scad: openscad
   application/pdf: later
   model/x-pov: later
+  model/iges: later
   image/x-eps: later
   video/mp4: later
   application/zip: compressed 
@@ -46,7 +48,6 @@ mime_type:
   application/x-rar-compressed: compressed
   application/coreldraw: later 
   application/postscript: later
-
   text/plain: later
 command:
   start: commander 
@@ -60,3 +61,7 @@ network:
   mapping: nmapper
 rpc:
   rpc_test: rpc_test
+bulk:
+  add_replica: bulk
+  detach: bulk
+  torrent: bulk

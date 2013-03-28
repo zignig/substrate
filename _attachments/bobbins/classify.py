@@ -4,6 +4,10 @@ import pika,couchdbkit,json
 import yaml,adapter,traceback,time,string,StringIO
 
 def callback(ch, method, properties, body):
+	print 'classify '+body
+	ch.basic_ack(delivery_tag = method.delivery_tag)
+	return
+
 	server = ch.couch
 	ref = json.loads(body)
 	cid = ref['id']

@@ -1,5 +1,6 @@
 #!/usr/bin/python
-import os,subprocess
+
+import os,subprocess,time
 import pika,couchdbkit,json
 import yaml,pika,redis
 import threading
@@ -133,8 +134,12 @@ class couch_queue:
 
 
 	def start(self,name):
-		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':name}))
+		self.channel.basic_publish('command','notify',json.dumps({'start_bobbin':name}))
 
+	def die(self):
+		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':'die'}))
+	def govenor(self):
+		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':'govenor'}))
 	def id(self,id):
 		ids = 'id:'+str(id)
 		if self.redis.exists(ids):
@@ -160,7 +165,9 @@ class couch_queue:
 			self.id(i)
 	
 	def spool(self,items):
-		for i in items:
+		self.message(json.dumps({'_id':items[0]}),'incoming','incoming')
+		time.sleep(2)
+		for i in items[1:]:
 			self.message(json.dumps({'_id':i}),'incoming','incoming')
 
 	def sync(self):
