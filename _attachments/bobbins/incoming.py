@@ -19,6 +19,7 @@ def callback(ch, method, properties, body):
 		#	return
 		if 'fail' in D:
 			print 'fail '+str(D)
+			ch.basic_publish('error','error',json.dumps({'_id':cid}))
 			return
 		if 'type' in D:
 			#print D['type']

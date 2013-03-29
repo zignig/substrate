@@ -49,7 +49,7 @@ def callback(ch, method, properties, body):
 					print target_spool + ' already running'
 				else:
 					print 'sending start to '+target_spool
-					ch.basic_publish('command','spindle',json.dumps({'bobbin':target_spool}))
+					ch.basic_publish('command','notify',json.dumps({'start_bobbin':target_spool}))
 					ch.cq.redis.sadd('running_bobbins',target_spool)
 				ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
 				cq.redis.set('recent:'+routing_key,'')
