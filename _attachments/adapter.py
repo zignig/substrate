@@ -2,12 +2,16 @@
 
 import os,subprocess,time
 import pika,couchdbkit,json
-import yaml,pika,redis
+import yaml,pika,redis,uuid
 import threading
+import logging
+
+logging.basicConfig()
 
 TTL = 9600 
 TTL2 = 86400 
 
+		
 class redis_query:
 	" redis query abstraction"
 	def __init__(self,database,redis,name,query):
@@ -41,7 +45,8 @@ class redis_query:
 				return list(self.redis.smembers(self.name+':'+str(query)))
 			else:
 				return [] 
-			
+
+# TODO fix __init__ perhaps break into 3 classes 
 class couch_queue:
 	def __init__(self,config='config.json'):
 		print("load config")
@@ -80,19 +85,18 @@ class couch_queue:
 			r = redis.Redis(svr)
 			self.redis = r
 			print("connected")
-			print("build queries")
+			#print("build queries")
 			qs = self.config['redis_query']
 			# dict access to queries 
 			self.queries = {}
 			for i in qs.keys():
-				print('   '+i)
+				#print('   '+i)
 				qe = redis_query(self.db,self.redis,i,qs[i])
 				self.queries[i] = qe
 				self.__dict__[i] = qe 
 
 		except:
 			print("redis failed")
-
 
 	def run_queue(self,default_queue,callback):
 		print('running '+default_queue)
@@ -104,19 +108,7 @@ class couch_queue:
 		self.channel.db = self.db
 		self.channel.basic_consume(callback,queue=default_queue)
 		self.channel.start_consuming()
-	
-	def build(self):
-		print "[X] building queues" 
-		for i in self.config['queues']:
-			print('creating queue '+i)
-			self.channel.queue_declare(queue=str(i))
-		
-	def flush(self):
-		print "[X] flushing queues" 
-		for i in self.config['queues']:
-			print('flushing queue '+i)
-			self.channel.queue_purge(queue=str(i))
-		
+
 	def message(self,mes,key='default',ex='incoming'):
 		self.channel.basic_publish(exchange=ex, routing_key=key, body=mes)
 	
@@ -132,14 +124,17 @@ class couch_queue:
 		self.db.save_doc(doc)
 		self.redis.delete(ids)
 
-
 	def start(self,name):
-		self.channel.basic_publish('command','notify',json.dumps({'start_bobbin':name}))
+		#self.channel.basic_publish('command','notify',json.dumps({'start_bobbin':name}))
+		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':name}))
 
 	def die(self):
 		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':'die'}))
+
 	def govenor(self):
 		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':'govenor'}))
+
+	# TODO rewrite this for multiple database
 	def id(self,id):
 		ids = 'id:'+str(id)
 		if self.redis.exists(ids):
@@ -159,14 +154,14 @@ class couch_queue:
 				print "FAIL"
 				return 'fail'
 	
-		
 	def load(self,items):
 		for i in items:
 			self.id(i)
 	
 	def spool(self,items):
+		print 'spooling '+str(len(items))
 		self.message(json.dumps({'_id':items[0]}),'incoming','incoming')
-		time.sleep(2)
+		time.sleep(1)
 		for i in items[1:]:
 			self.message(json.dumps({'_id':i}),'incoming','incoming')
 
@@ -195,9 +190,6 @@ class couch_queue:
 		qt.setDaemon(True)
 		qt.start()
 		return qt
-	
-
-
 
 class item:
 	def __init__(self,cq,exchange,key):
@@ -208,27 +200,65 @@ class item:
 	def __call__(self,message={}):
 		self.cq.channel.basic_publish(self.exchange,self.key,json.dumps(message))
 
+	def register(self,new_key):
+		self.cq.channel.basic_publish(self.exchange,new_key,json.dumps({'register':'True'}))
 	def send(self,message):
 		self.cq.channel.basic_publish(self.exchange,self.key,json.dumps(message))
 		
 class empty:
 	def __init__(self):
 		pass
-def base_callback(ch, method, properties, body):
-	print ch,method,properties,body
-	ch.basic_ack(delivery_tag = method.delivery_tag)
-
-def test(queue_name):
-	cq = couch_queue()
-	cq.run_queue(queue_name,callback)
 
 
+# original spindle object 
+# see worker 
 class queue_thread(threading.Thread):
 	def __init__(self,cq,queue_name,callback):
 		threading.Thread.__init__(self)
-		self.cq = cq
+		self.cq = couch_queue() 
 		self.queue_name = queue_name
 		self.callback = callback
 	
 	def run(self):
 		self.cq.run_queue(self.queue_name,self.callback)
+
+def encode(value):
+	return json.dumps(value)
+
+def decode(value):
+	return json.loads(value)
+
+class worker(threading.Thread):
+	def __init__(self,queue_name):
+		print "building"
+		threading.Thread.__init__(self)
+		self.cq = couch_queue()
+		print queue_name
+		self.queue = queue_name
+		self.id = uuid.uuid4()
+		self.channel = self.cq.channel
+		self.callback = self.base_callback
+	
+	def consume(self,body):
+		pass
+		print 'sub ',self.queue,body
+		ch.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue}))
+
+	def base_callback(self,ch, method, properties, body):
+		mess = {'ex':method.exchange,'rk':method.routing_key,'body':body}
+		try:
+			data = json.loads(body)
+			self.consume(data)
+		except:
+			ch.basic_publish('logging','error',encode({'queue':self.queue,'json_error':str(body)}))
+		ch.basic_ack(delivery_tag = method.delivery_tag)
+
+	def run(self):
+		print('running '+self.queue)
+		# add the server to the queue for couch access
+		self.channel.couch = self.cq.server
+		self.channel.config = self.cq.config
+		self.channel.db = self.cq.db
+		self.channel.basic_consume(self.callback,queue=self.queue)
+		print "bound consume"
+		self.channel.start_consuming()

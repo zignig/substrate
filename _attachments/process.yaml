@@ -1,4 +1,5 @@
 incoming:
+  testing: template
   incoming: incoming
   build : builder 
   load: loader
@@ -7,6 +8,8 @@ incoming:
   download: downloads
   process: process
   reset: reset
+logging:
+  error: dev_error
 query:
   query: search_engine
 render:
@@ -23,8 +26,8 @@ status:
 checker:
   manifold: maninfoldiness
 type_router:
-  thing: thing
-  thingiverse: thing_fetch 
+  thing: process 
+  thingiverse: process 
   collection: coll
   replica: replication
   git: clone_update

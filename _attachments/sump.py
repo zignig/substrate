@@ -40,17 +40,14 @@ def callback(ch, method, properties, body):
 				cq.message(json.dumps(ref),routing_key,exchange)
 			else:
 				print 'binding '+exchange+' -> '+routing_key+' -> '+target_spool
-				ch.queue_declare(queue=target_spool,arguments={'x-expires':120000})
-				#ch.queue_declare(queue=target_spool,arguments={'x-expires':5000})
+				#ch.queue_declare(queue=target_spool,arguments={'x-expires':5*60*1000})
+				#ch.queue_declare(queue=target_spool,arguments={'x-expires':10000})
+				ch.queue_declare(queue=target_spool,arguments={'x-expires':60*60*1000})
 				ch.queue_bind(queue=target_spool,exchange=exchange,routing_key=routing_key)
 				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
 				cq.message(json.dumps(ref),routing_key,exchange)
-				if ch.cq.redis.sismember('running_bobbins',target_spool):
-					print target_spool + ' already running'
-				else:
-					print 'sending start to '+target_spool
-					ch.basic_publish('command','notify',json.dumps({'start_bobbin':target_spool}))
-					ch.cq.redis.sadd('running_bobbins',target_spool)
+				ch.basic_publish('command','spindle',json.dumps({'bobbin':target_spool}))
+				ch.cq.redis.sadd('running_bobbins',target_spool)
 				ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
 				cq.redis.set('recent:'+routing_key,'')
 				cq.redis.expire('recent:'+routing_key,30)
@@ -67,9 +64,7 @@ def gen_exchanges():
 	cq.channel.queue_declare(queue='sump_spool')
 	cq.channel.queue_bind(queue='sump_spool',exchange='sump',routing_key='*')
 	print 'building error'
-	#cq.channel.exchange_declare(exchange='error',exchange_type='fanout',arguments={}) 
-	#cq.channel.queue_declare(queue='error_spool')
-	#cq.channel.queue_bind(queue='error_spool',exchange='error',routing_key='*')
+	print '-----'
 	print 'building top level exchanges'
 	for i in proc.keys():
 		print 'primary exchange '+i
@@ -79,5 +74,5 @@ if __name__ == "__main__":
 	cq = adapter.couch_queue()
 	gen_exchanges()
 	cq.channel.basic_publish('command','start',json.dumps({'base':'start'}))
-	cq.channel.basic_publish('error','error',json.dumps({'base':'start'}))
+	cq.channel.basic_publish('logging','error',json.dumps({'base':'start'}))
 	cq.run_queue('sump_spool',callback)
