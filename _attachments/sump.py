@@ -36,17 +36,17 @@ def callback(ch, method, properties, body):
 			#print '===> '+routing_key
 			target_spool = proc[exchange][routing_key]
 			if cq.redis.exists('recent:'+routing_key):
-				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
+				#print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
 				cq.message(json.dumps(ref),routing_key,exchange)
 			else:
 				print 'binding '+exchange+' -> '+routing_key+' -> '+target_spool
 				#ch.queue_declare(queue=target_spool,arguments={'x-expires':5*60*1000})
-				#ch.queue_declare(queue=target_spool,arguments={'x-expires':10000})
-				ch.queue_declare(queue=target_spool,arguments={'x-expires':60*60*1000})
+				ch.queue_declare(queue=target_spool,arguments={'x-expires':60000})
+				#ch.queue_declare(queue=target_spool,arguments={'x-expires':60*60*1000})
 				ch.queue_bind(queue=target_spool,exchange=exchange,routing_key=routing_key)
 				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
 				cq.message(json.dumps(ref),routing_key,exchange)
-				ch.basic_publish('command','spindle',json.dumps({'bobbin':target_spool}))
+				ch.basic_publish('command','notify',json.dumps({'start_bobbin':target_spool}))
 				ch.cq.redis.sadd('running_bobbins',target_spool)
 				ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
 				cq.redis.set('recent:'+routing_key,'')

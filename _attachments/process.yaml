@@ -59,7 +59,7 @@ command:
   stop: commander 
   schedule: scheduler
   notify: govenor
-  spindle: spindle 
+  spindle: govenor 
 error:
   error: dev_error
 network:

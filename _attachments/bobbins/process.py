@@ -11,7 +11,7 @@ class process(adapter.worker):
 			if '_attachments' in doc:
 				att = doc['_attachments']
 				for i in att:
-					print i
+					#print i
 				 	self.channel.basic_publish('mime_type',att[i]['content_type'],adapter.encode({'att':i}))
 				
 

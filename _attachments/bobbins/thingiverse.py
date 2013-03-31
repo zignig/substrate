@@ -9,5 +9,7 @@ class thingiverse(adapter.worker):
 		doc = self.cq.id(body['_id'])
 		if 'thing_fetched' in doc:
 			self.channel.basic_publish('incoming','process',adapter.encode(body))
+		else:
+			self.channel.basic_publish('incoming','download',adapter.encode(body))
 
 export = thingiverse 

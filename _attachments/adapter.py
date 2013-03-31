@@ -125,14 +125,14 @@ class couch_queue:
 		self.redis.delete(ids)
 
 	def start(self,name):
-		#self.channel.basic_publish('command','notify',json.dumps({'start_bobbin':name}))
-		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':name}))
+		self.channel.basic_publish('command','notify',json.dumps({'start_bobbin':name}))
+		#self.channel.basic_publish('command','spindle',json.dumps({'bobbin':name}))
 
 	def die(self):
 		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':'die'}))
 
 	def govenor(self):
-		self.channel.basic_publish('command','spindle',json.dumps({'bobbin':'govenor'}))
+		self.channel.basic_publish('command','spindle',json.dumps({'start_bobbin':'govenor'}))
 
 	# TODO rewrite this for multiple database
 	def id(self,id):
@@ -242,15 +242,12 @@ class worker(threading.Thread):
 	def consume(self,body):
 		pass
 		print 'sub ',self.queue,body
-		ch.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue}))
+		self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue}))
 
 	def base_callback(self,ch, method, properties, body):
 		mess = {'ex':method.exchange,'rk':method.routing_key,'body':body}
-		try:
-			data = json.loads(body)
-			self.consume(data)
-		except:
-			ch.basic_publish('logging','error',encode({'queue':self.queue,'json_error':str(body)}))
+		data = json.loads(body)
+		self.consume(data)
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 
 	def run(self):

@@ -1,13 +1,12 @@
-#!/usr/bin/env python
-import os,subprocess
-import pika,couchdbkit,json
-import yaml,adapter,traceback
-import redis,json,time
+#!/usr/bin/python
+import adapter
 
-def callback(ch, method, properties, body):
-	print body
-	ch.basic_ack(delivery_tag = method.delivery_tag)
+class dev_error(adapter.worker):
+	def __init__(self,queue):
+		adapter.worker.__init__(self,queue)
 	
-if __name__ == "__main__":
-	cq = adapter.couch_queue()
-	cq.run_queue('dev_error',callback)
+	def consume(self,body):
+		print body
+
+w = dev_error('dev_error')
+w.start()
