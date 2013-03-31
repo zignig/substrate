@@ -26,11 +26,13 @@ status:
 checker:
   manifold: maninfoldiness
 type_router:
-  thing: process 
-  thingiverse: process 
+  thing: thing 
+  thingiverse: thingiverse 
   collection: coll
   replica: replication
   git: clone_update
+  image: image
+  anim: anim
 mime_type:
   application/sla: stl
   image/jpeg: thumbnail

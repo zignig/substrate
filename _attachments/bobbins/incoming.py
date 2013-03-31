@@ -7,7 +7,6 @@ class incoming(adapter.worker):
 	
 	def consume(self,body):
 		cid = body['_id']
-		print 'load '+cid
 		doc = self.cq.id(cid)
 		if 'type' in doc:
 			self.channel.basic_publish('type_router',doc['type'],adapter.encode(body))

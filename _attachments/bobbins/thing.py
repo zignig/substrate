@@ -10,6 +10,6 @@ class thing(adapter.worker):
 		print 'thing '+body
 		if '_id' in body:
 			print 'thing ',self.queue,body['_id']
-			#self.channel.basic_publish('incoming','process',adapter.encode(body))
+			self.channel.basic_publish('incoming','process',adapter.encode(body))
 
 export = thing
