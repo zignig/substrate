@@ -58,7 +58,7 @@ mime_type:
 command:
   start: commander 
   stop: commander 
-  schedule: scheduler
+  schedule: schedule
   notify: govenor
   spindle: govenor 
 error:
