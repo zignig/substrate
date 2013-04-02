@@ -8,6 +8,7 @@ incoming:
   download: downloads
   process: process
   reset: reset
+  changes: changes
 logging:
   error: dev_error
 query:
