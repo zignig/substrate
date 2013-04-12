@@ -1,13 +1,11 @@
-#!/usr/bin/python
 import adapter
-from bobbins import govenor
 
-class dev_error(adapter.worker):
+" thumbnail spooler "
+class thumbnail(adapter.worker):
 	def __init__(self,queue):
 		adapter.worker.__init__(self,queue)
 	
 	def consume(self,body):
 		print body
 
-w = dev_error('dev_error')
-w.start()
+export = thumbnail 

@@ -6,8 +6,13 @@ class test(adapter.worker):
 		adapter.worker.__init__(self,queue)
 	
 	def consume(self,body):
-		print body
 		doc = self.cq.id(body['_id'])
-		print doc
+		if 'thumb' not in doc:
+			if '_attachments' in doc:
+				att = doc['_attachments']
+				for i in att:
+					print i
+					self.channel.basic_publish('render','thumbnail',adapter.encode({'_id':body['_id'],'file':i}))
+		
 
 export = test

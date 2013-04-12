@@ -10,7 +10,6 @@ path = cq.local_config['import_path']
 li = os.listdir(path)
 print li
 for i in li:
-	print i
 	try:
 		li = cq.attach(i)
 		if len(li) == 0:
