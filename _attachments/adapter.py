@@ -244,10 +244,27 @@ class worker(threading.Thread):
 		print 'sub ',self.queue,body
 		self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue}))
 
+	def route_message(self,body):
+		print body
+		route = body['route']
+		if len(route) > 0:
+			next_target = body['route'].pop(0)
+			self.channel.basic_publish(next_target[0],next_target[1],encode(body))
+		
 	def base_callback(self,ch, method, properties, body):
 		mess = {'ex':method.exchange,'rk':method.routing_key,'body':body}
 		data = json.loads(body)
-		self.consume(data)
+		result = self.consume(data)
+		if result == True:
+			self.channel.basic_publish('logging','logging',encode({'consume':str(body),'queue':self.queue}))
+			if 'route' in data:
+				self.route_message(data)
+		if result == None:
+			self.channel.basic_publish('logging','logging',encode({'consume':str(body),'return':'none'}))
+			if 'route' in data:
+				self.route_message(data)
+		if result == False:
+			self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 
 	def run(self):

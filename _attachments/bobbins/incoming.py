@@ -12,5 +12,6 @@ class incoming(adapter.worker):
 			doc = self.cq.id(cid)
 			if 'type' in doc:
 				self.channel.basic_publish('type_router',doc['type'],adapter.encode(body))
+				return True
 
 export = incoming 
