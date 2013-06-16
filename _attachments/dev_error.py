@@ -9,5 +9,6 @@ class dev_error(adapter.worker):
 	def consume(self,body):
 		print body
 
+
 w = dev_error('dev_error')
 w.start()

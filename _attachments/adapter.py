@@ -260,7 +260,6 @@ class worker(threading.Thread):
 			if 'route' in data:
 				self.route_message(data)
 		if result == None:
-			self.channel.basic_publish('logging','logging',encode({'consume':str(body),'return':'none'}))
 			if 'route' in data:
 				self.route_message(data)
 		if result == False:
