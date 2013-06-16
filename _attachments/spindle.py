@@ -3,7 +3,7 @@ import os,subprocess
 import pika,couchdbkit,json
 import yaml,adapter,traceback
 import readline , rlcompleter , uuid
-import importlib
+import importlib,sys
 
 cq = adapter.couch_queue()
 comm = cq.channel.queue_declare(exclusive=True)
@@ -22,8 +22,9 @@ def try_load(name,namespace='bobbins'):
 		mod = importlib.import_module(namespace+'.'+name)
 		print mod.export
 		return (True,mod.export)
-	except:
-		print 'load failed of '+name
+	except Exception,e:
+		exc_type, exc_value, exc_tb = sys.exc_info()
+		traceback.print_exception(exc_type, exc_value, exc_tb)
 		return (False,False)
 		
 def comm_callback(ch, method, properties, body):

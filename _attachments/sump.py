@@ -40,9 +40,8 @@ def callback(ch, method, properties, body):
 				cq.message(json.dumps(ref),routing_key,exchange)
 			else:
 				print 'binding '+exchange+' -> '+routing_key+' -> '+target_spool
-				#ch.queue_declare(queue=target_spool,arguments={'x-expires':5*60*1000})
-				ch.queue_declare(queue=target_spool)
-				#ch.queue_declare(queue=target_spool,arguments={'x-expires':60000})
+				ch.queue_declare(queue=target_spool,arguments={'x-expires':10*1000})
+				#ch.queue_declare(queue=target_spool)
 				#ch.queue_declare(queue=target_spool,arguments={'x-expires':60*60*1000})
 				ch.queue_bind(queue=target_spool,exchange=exchange,routing_key=routing_key)
 				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key

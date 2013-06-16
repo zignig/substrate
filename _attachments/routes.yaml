@@ -1,0 +1,4 @@
+application/sla:
+  - [checker,manifold]
+  - [render,thumbnail]
+  - [process,slice]

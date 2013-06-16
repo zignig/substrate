@@ -6,6 +6,6 @@ class thumbnail(adapter.worker):
 		adapter.worker.__init__(self,queue)
 	
 	def consume(self,body):
-		print body
+		print 'thumbnail =>'+body['att'] 
 
 export = thumbnail 

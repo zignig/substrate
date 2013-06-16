@@ -4,6 +4,7 @@ import adapter
 class process(adapter.worker):
 	def __init__(self,queue):
 		adapter.worker.__init__(self,queue)
+		self.routes = self.routes
 	
 	def consume(self,body):
 		if '_id' in body:
@@ -12,7 +13,13 @@ class process(adapter.worker):
 				att = doc['_attachments']
 				for i in att:
 					#print i
-				 	self.channel.basic_publish('mime_type',att[i]['content_type'],adapter.encode({'att':i,'_id':body['_id']}))
+					mime_type = att[i]['content_type']
+					mess = {'att':i,'_id':body['_id']}
+					if mime_type in self.routes:
+						print 'route for '+mime_type
+						mess['route'] = self.routes[mime_type]
+						
+				 	self.channel.basic_publish('mime_type',mime_type,adapter.encode(mess))
 				
 
 export = process 

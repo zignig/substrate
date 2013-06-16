@@ -54,6 +54,7 @@ class couch_queue:
 				os.stat(config)
 				conf = json.loads(open('config.json').read())
 				self.local_config = conf
+				self.routes = yaml.load(open('routes.yaml').read())	
 		except:
 				print("no config")
 
@@ -233,6 +234,7 @@ class worker(threading.Thread):
 		print "building"
 		threading.Thread.__init__(self)
 		self.cq = couch_queue()
+		self.routes = self.cq.routes
 		print queue_name
 		self.queue = queue_name
 		self.id = uuid.uuid4()
@@ -265,6 +267,11 @@ class worker(threading.Thread):
 		if result == False:
 			self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
 		ch.basic_ack(delivery_tag = method.delivery_tag)
+	
+	def save_routes(self):
+		f = open('full_routes.yaml','w')
+		f.write(yaml.dump(self.routes))
+		f.close()
 
 	def run(self):
 		print('running '+self.queue)

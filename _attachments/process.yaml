@@ -1,60 +1,26 @@
 incoming:
-  testing: template
   incoming: incoming
-  build : builder 
-  load: loader
   changes: changes
   thingi_id: thingiverse
   download: downloads
   process: process
-  reset: reset
-  changes: changes
 logging:
   error: dev_error
-query:
-  query: search_engine
+  logging: dev_error
 render:
   stl: stl
   thumbnail: thumbnail
   animation: spin
-publish:
-  database: database
-  thing: publish_thing
-status:
-  new: new_thing
-  complete: complete_thing
-  pending: pending_thing
 checker:
-  manifold: maninfoldiness
+  manifold: manifold
+process:
+  slice: slicer
 type_router:
   thing: thing 
   thingiverse: thingiverse 
-  collection: coll
-  replica: replication
-  git: clone_update
-  image: image
-  anim: anim
 mime_type:
   application/sla: stl
-  image/jpeg: thumbnail
   application/octet-stream: classify
-  image/svg+xml: svg_proc
-  image/png: thumbnail
-  image/gif: thumbnail
-  image/tiff: later
-  text/scad: openscad
-  application/pdf: later
-  model/x-pov: later
-  model/iges: later
-  image/x-eps: later
-  video/mp4: later
-  application/zip: compressed 
-  application/x-tar: compressed 
-  application/rar: compressed
-  application/x-rar-compressed: compressed
-  application/coreldraw: later 
-  application/postscript: later
-  text/plain: later
 command:
   start: commander 
   stop: commander 
@@ -63,11 +29,3 @@ command:
   spindle: govenor 
 error:
   error: dev_error
-network:
-  mapping: nmapper
-rpc:
-  rpc_test: rpc_test
-bulk:
-  add_replica: bulk
-  detach: bulk
-  torrent: bulk
