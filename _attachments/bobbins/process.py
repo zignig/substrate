@@ -12,13 +12,11 @@ class process(adapter.worker):
 			if '_attachments' in doc:
 				att = doc['_attachments']
 				for i in att:
-					#print i
 					mime_type = att[i]['content_type']
-					mess = {'att':i,'_id':body['_id']}
+					mess = {'att':i,'_id':body['_id'],'mime_type':mime_type}
 					if mime_type in self.routes:
-						print 'route for '+mime_type
+						#print 'route for '+mime_type
 						mess['route'] = self.routes[mime_type]
-						
 				 	self.channel.basic_publish('mime_type',mime_type,adapter.encode(mess))
 				
 

@@ -1,4 +1,5 @@
 import adapter
+import commands
 
 " template spooler "
 class maninfold(adapter.worker):

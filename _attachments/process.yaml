@@ -4,9 +4,6 @@ incoming:
   thingi_id: thingiverse
   download: downloads
   process: process
-logging:
-  error: dev_error
-  logging: dev_error
 render:
   stl: stl
   thumbnail: thumbnail
@@ -15,17 +12,11 @@ checker:
   manifold: manifold
 process:
   slice: slicer
+  scad_compile: scad_compile
+  scad_modules: scad_modules
 type_router:
   thing: thing 
   thingiverse: thingiverse 
 mime_type:
-  application/sla: stl
+  application/sla: manifold 
   application/octet-stream: classify
-command:
-  start: commander 
-  stop: commander 
-  schedule: schedule
-  notify: govenor
-  spindle: govenor 
-error:
-  error: dev_error

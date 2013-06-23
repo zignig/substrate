@@ -2,7 +2,9 @@
 import os,subprocess
 import pika,couchdbkit,json
 import yaml,adapter,traceback,time
-base_ttl = 2
+
+import bobbins.govenor as gov
+base_ttl = 8 
 proc = yaml.load(open('process.yaml').read())
 current_set =  {}
 
@@ -61,8 +63,12 @@ def callback(ch, method, properties, body):
 def gen_exchanges():
 	print 'building sump'
 	cq.channel.exchange_declare(exchange='sump',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
+	cq.channel.exchange_declare(exchange='command',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
 	cq.channel.queue_declare(queue='sump_spool')
+	cq.channel.queue_declare(queue='govenor')
+	cq.channel.queue_declare(queue='dev_error')
 	cq.channel.queue_bind(queue='sump_spool',exchange='sump',routing_key='*')
+	cq.channel.queue_bind(queue='govenor',exchange='command',routing_key='notify')
 	print 'building error'
 	print '-----'
 	print 'building top level exchanges'
@@ -74,5 +80,11 @@ if __name__ == "__main__":
 	cq = adapter.couch_queue()
 	gen_exchanges()
 	cq.channel.basic_publish('command','start',json.dumps({'base':'start'}))
+	cq.channel.basic_publish('command','notify',json.dumps({'base':'start'}))
 	cq.channel.basic_publish('logging','error',json.dumps({'base':'start'}))
+	cq.channel.basic_publish('logging','error',json.dumps({'base':'start'}))
+	# start up the govenor
+	g = gov.govenor('govenor')
+	g.setDaemon(True)
+	g.start()
 	cq.run_queue('sump_spool',callback)

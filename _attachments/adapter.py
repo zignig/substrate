@@ -247,7 +247,6 @@ class worker(threading.Thread):
 		self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue}))
 
 	def route_message(self,body):
-		print body
 		route = body['route']
 		if len(route) > 0:
 			next_target = body['route'].pop(0)
