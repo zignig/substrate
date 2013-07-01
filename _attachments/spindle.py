@@ -54,7 +54,7 @@ def comm_callback(ch, method, properties, body):
 			new_worker.start()
 			print 'worker running'
 			#tmp_cq.start_spool(ref['bobbin'],new_worker.callback)
-			cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(new_worker.id),'name':body}}))
+			cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(new_worker.id),'name':bobbin}}))
 		else:
 			cq.channel.basic_publish('error','error',json.dumps({'error':body}))
 

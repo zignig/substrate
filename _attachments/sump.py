@@ -42,32 +42,34 @@ def callback(ch, method, properties, body):
 				cq.message(json.dumps(ref),routing_key,exchange)
 			else:
 				print 'binding '+exchange+' -> '+routing_key+' -> '+target_spool
-				ch.queue_declare(queue=target_spool,arguments={'x-expires':10*1000})
-				#ch.queue_declare(queue=target_spool)
-				#ch.queue_declare(queue=target_spool,arguments={'x-expires':60*60*1000})
+				ch.queue_declare(queue=target_spool,arguments={'x-expires':2*1000})
 				ch.queue_bind(queue=target_spool,exchange=exchange,routing_key=routing_key)
 				print 'resending '+str(ref)+' to '+exchange+'=>'+routing_key
 				cq.message(json.dumps(ref),routing_key,exchange)
 				ch.basic_publish('command','notify',json.dumps({'start_bobbin':target_spool}))
 				ch.cq.redis.sadd('running_bobbins',target_spool)
-				ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
+				#ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
 				cq.redis.set('recent:'+routing_key,'')
 				cq.redis.expire('recent:'+routing_key,30)
 		else:
 			print 'unknown key '+routing_key
-			print 'binding '+exchange+' -> '+routing_key+' to error' 
-			ch.queue_bind(queue='dev_error',exchange=exchange,routing_key=routing_key)
-			ch.basic_publish('error','error',json.dumps({'error':ref,'routing_key':routing_key}))
+			print 'binding '+exchange+' -> '+routing_key+' to unknown' 
+			ch.queue_bind(queue='unknown',exchange=exchange,routing_key=routing_key)
+			ch.basic_publish('error','unknown',json.dumps({'error':ref,'exchange':exchange,'routing_key':routing_key}))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 
 def gen_exchanges():
 	print 'building sump'
 	cq.channel.exchange_declare(exchange='sump',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
 	cq.channel.exchange_declare(exchange='command',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
+	cq.channel.exchange_declare(exchange='error',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
+	cq.channel.exchange_declare(exchange='logging',exchange_type='topic',arguments={'alternate-exchange':'fail'}) 
 	cq.channel.queue_declare(queue='sump_spool')
 	cq.channel.queue_declare(queue='govenor')
 	cq.channel.queue_declare(queue='dev_error')
+	cq.channel.queue_declare(queue='unknown')
 	cq.channel.queue_bind(queue='sump_spool',exchange='sump',routing_key='*')
+	cq.channel.queue_bind(queue='dev_error',exchange='error',routing_key='*')
 	cq.channel.queue_bind(queue='govenor',exchange='command',routing_key='notify')
 	print 'building error'
 	print '-----'

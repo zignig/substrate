@@ -264,7 +264,7 @@ class worker(threading.Thread):
 			if 'route' in data:
 				self.route_message(data)
 		if result == False:
-			self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
+			self.channel.basic_publish('error','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 	
 	def save_routes(self):

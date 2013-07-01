@@ -5,18 +5,23 @@ incoming:
   download: downloads
   process: process
 render:
-  stl: stl
+  stl_viz: stl_viz
   thumbnail: thumbnail
   animation: spin
 checker:
   manifold: manifold
 process:
+  changes: changes
   slice: slicer
   scad_compile: scad_compile
   scad_modules: scad_modules
 type_router:
   thing: thing 
   thingiverse: thingiverse 
+  image: image
 mime_type:
   application/sla: manifold 
   application/octet-stream: classify
+  text/scad: scad_compile
+schedule:
+  add: schedule

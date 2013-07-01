@@ -1,4 +1,4 @@
-#!/usr/bin/python -i
+#!/usr/bin/python 
 import os,subprocess
 import pika,couchdbkit,json
 import yaml,adapter,traceback
@@ -20,3 +20,4 @@ for i in li:
 			cq.db.put_attachment(doc,d,i)
 	except:
 		print 'fail'
+cq.redis.flushall()

@@ -1,5 +1,5 @@
 application/sla:
-  - [checker,manifold]
-  - [render,thumbnail]
+  - [render,stl_viz]
+  - [process,slice]
 text/scad:
   - [process,scad_compile]
