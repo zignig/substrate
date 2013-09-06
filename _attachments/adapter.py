@@ -267,10 +267,8 @@ class worker(threading.Thread):
 			self.channel.basic_publish('error','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 	
-	def save_routes(self):
-		f = open('full_routes.yaml','w')
-		f.write(yaml.dump(self.routes))
-		f.close()
+	def stop(self):
+		self.channel.stop_consuming()
 
 	def run(self):
 		print('running '+self.queue)

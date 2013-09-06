@@ -11,11 +11,15 @@ li = os.listdir(path)
 print li
 for i in li:
 	try:
-		li = cq.attach(i)
-		if len(li) == 0:
+		li2 = cq.attach(i)
+		print li2
+		if len(li2) == 0:
 			print 'import '+i
 			d = open(path+os.sep+i)
 			doc = {'type':'image'}
+			doc['image'] = i 
+			doc['tags'] = ['new']
+			print doc
 			cq.db.save_doc(doc)
 			cq.db.put_attachment(doc,d,i)
 	except:

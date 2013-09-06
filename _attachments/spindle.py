@@ -13,6 +13,7 @@ cq.channel.queue_bind(queue=comm.method.queue,exchange='command',routing_key='sp
 services = {'queue':comm.method.queue }
 cq.channel.basic_publish('command','notify',json.dumps({'spindle':services}))
 
+global threads
 threads = {}
 
 def try_load(name,namespace='bobbins'):
@@ -36,6 +37,12 @@ def comm_callback(ch, method, properties, body):
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 		return
 	ch.basic_ack(delivery_tag = method.delivery_tag)
+	if 'stop' in ref:
+		print threads
+		print 'stopping' + str(ref)
+		if ref['stop'] in threads:
+			the_thread = threads[ref['stop']]
+			the_thread.stop()	
 	if 'start_bobbin' in ref:
 		bobbin = ref['start_bobbin']
 		print 'try load'
@@ -49,7 +56,7 @@ def comm_callback(ch, method, properties, body):
 			new_worker = caller(bobbin)
 			new_worker.spindle = comm.method.queue
 			new_worker.setDaemon(True)
-			threads[new_worker.id] = new_worker
+			threads[str(new_worker.id)] = new_worker
 			print 'start worker'
 			new_worker.start()
 			print 'worker running'
