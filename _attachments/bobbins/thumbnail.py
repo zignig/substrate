@@ -21,10 +21,10 @@ def process_image(val,cq):
         doc['thumb'] = 'thumb.jpg'
         doc['robot_status'] = 'done'
         if 'file_info' in doc:
-          doc['file_info']['image'] = {val['att']:'thumb.jpg'}
+          doc['file_info'][val['att']] = {'type':'image','thumb':'thumb.jpg'}
         else:
           doc['file_info'] = {}
-          doc['file_info']['image'] = {val['att']:'thumb.jpg'}
+          doc['file_info'][val['att']] = {'type':'image','thumb':'thumb.jpg'}
         b = cq.db.save_doc(doc)
         data = StringIO.StringIO()
         image.save(data,"JPEG")

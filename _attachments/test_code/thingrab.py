@@ -4,8 +4,10 @@ import requests,redis,json
 from bs4 import BeautifulSoup
 
 red = redis.Redis()
-
+ttl = 8640000
 def get_thing(thing_id):
+	if red.exists('thing_doc:'+str(thing_id)):
+		return json.loads(red.get('thing_doc:'+str(thing_id)))
 	s = requests.session()
 	url = 'http://thingiverse.com/thing:'+str(thing_id)
 	path = 'thing:'+str(thing_id)
@@ -15,7 +17,7 @@ def get_thing(thing_id):
 		r = s.get(url)
 		data = r.content
 		red.set(path,data)
-		red.expire(path,86400)
+		#red.expire(path,ttl)
 	soup = BeautifulSoup(data)
 	#title 
 	title = soup.find('div',attrs={'class':'thing-interaction-parent'}).get('title')
@@ -45,8 +47,13 @@ def get_thing(thing_id):
 		tag_list.append(t)
 	#print tag_list
 	# instructions
-	instructions = soup.find('div',attrs={'id':'instructions','class':'thing-info-content'}).get_text()
+	instruct= soup.find('div',attrs={'id':'instructions','class':'thing-info-content'})
+	if instruct == None:
+		instructions = ''
+	else:
+		instructions = instruct.get_text()
 	#print instructions
+
 	# generate doc
 	doc = {
 		'author': author,
@@ -61,9 +68,71 @@ def get_thing(thing_id):
 		'path': ['thingiverse','new'],
 		'url': url
 	}		
+	red.set('thing_doc:'+str(thing_id),json.dumps(doc))
+	red.sadd('things',str(thing_id))
+	red.rpush('thing_queue',str(thing_id))
+	#red.expire('thing_doc:'+str(thing_id),ttl)
 	return doc
+
+def get_author_id(author):
+	s = requests.session()
+	url = 'http://www.thingiverse.com/'+author
+	path = 'author_page:'+str(author)
+	if red.exists(path):
+		data = red.get(path) 
+	else:
+		r = s.get(url)
+		data = r.content
+		red.set(path,data)
+		#red.expire(path,ttl)
+	soup = BeautifulSoup(data)
+	rss_feed = soup.find('head').find('link',attrs={"rel":"alternate"}).get("href")
+	author_id = rss_feed.split(':')[-1]
+	return author_id
+
+def get_author(author_id):
+	s = requests.session()
+	thing_list = 'author_ids:'+author_id
+	if red.exists(thing_list):
+		return json.loads(red.get(thing_list))
+	url = 'http://www.thingiverse.com/ajax/user/designs'
+	path = 'author:'+str(author_id)
+	payload = {'id':author_id,'page':1,'per_page':50}
+	if red.exists(path):
+		data = red.get(path) 
+	else:
+		r = s.post(url,data=payload)
+		data = r.content
+		red.set(path,data)
+		red.expire(path,ttl)
+	soup = BeautifulSoup(data)
+	a = soup.find_all('div',attrs={'class':'row-fluid'})
+	things = []
+	for i in a:
+		thing_slug = i.find('a').get('href')
+		thing_id = int(thing_slug.split(':')[1])
+		things.append(thing_id)	
+	red.set(thing_list,json.dumps(things))
+	return things
+
+	
 #doc = get_thing(35167)
 #doc = get_thing(126371)
 #doc = get_thing(50212)
-doc = get_thing(40212)
-print json.dumps(doc,indent=True)
+#doc = get_thing(40212)
+#doc = get_thing(39682)
+#print json.dumps(doc,indent=True)
+
+def grab_author(author):
+	author_id =  get_author_id(author)
+	print author_id
+	things = get_author(author_id)
+	for i in things:
+		doc = get_thing(i)
+		try:
+			print str(doc['name']),doc['thing_id']
+		except:
+			print 'fail'
+
+grab_author('zignig')
+
