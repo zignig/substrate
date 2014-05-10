@@ -33,7 +33,7 @@ def get_thing(thing_id):
 	#print description
 	#dowloads 	
 	downloads = []
-	n = soup.find_all('div',attrs={'class':"thing-file-container"})
+	n = soup.find_all('div',attrs={'class':"thing-file"})
 	for i in n:
 		download = i.find('a',attrs={'class':'track'}).get('href')
 		file_name = i.find('div',attrs={'class':'filename'}).get_text()
