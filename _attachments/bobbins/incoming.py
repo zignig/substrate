@@ -10,8 +10,12 @@ class incoming(adapter.worker):
 			cid = body['_id']
 			print cid
 			doc = self.cq.id(cid)
+			#doc['marked'] = True
+			#self.cq.save(cid,doc)
+			#self.cq.sync()
 			if 'type' in doc:
 				self.channel.basic_publish('type_router',doc['type'],adapter.encode(body))
+				#self.channel.basic_publish('amq.topic','chat.general',cid)
 				return True
 
 export = incoming 

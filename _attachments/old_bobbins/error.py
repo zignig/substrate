@@ -4,7 +4,7 @@ import pika,couchdbkit,json
 import yaml,adapter,traceback
 
 def callback(ch, method, properties, body):
-	print body
+	print methon,properties,body
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 	
 if __name__ == "__main__":

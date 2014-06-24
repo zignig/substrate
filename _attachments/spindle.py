@@ -17,67 +17,71 @@ global threads
 threads = {}
 
 def try_load(name,namespace='bobbins'):
-	" attempt load a bobbin "
-	try:
-		print 'trying to load '+name
-		mod = importlib.import_module(namespace+'.'+name)
-		print mod.export
-		return (True,mod.export)
-	except Exception,e:
-		exc_type, exc_value, exc_tb = sys.exc_info()
-		traceback.print_exception(exc_type, exc_value, exc_tb)
-		return (False,False)
-		
+    " attempt load a bobbin "
+    try:
+        print 'trying to load '+name
+        mod = importlib.import_module(namespace+'.'+name)
+        print mod.export
+        return (True,mod.export)
+    except Exception,e:
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_tb)
+        return (False,False)
+
+def notify(id,name):
+    cq.channel.basic_publish('command','notify',json.dumps({'action':'finish','id':id,'name':name}))
+        
 def comm_callback(ch, method, properties, body):
-	print body
-	try:
-		ref = json.loads(body)
-	except:
-		print body + ' not json'
-		ch.basic_ack(delivery_tag = method.delivery_tag)
-		return
-	ch.basic_ack(delivery_tag = method.delivery_tag)
-	if 'stop' in ref:
-		print threads
-		print 'stopping' + str(ref)
-		if ref['stop'] in threads:
-			the_thread = threads[ref['stop']]
-			the_thread.stop()	
-	if 'start_bobbin' in ref:
-		bobbin = ref['start_bobbin']
-		print 'try load'
-		status , caller = try_load(bobbin)
-		print 'finish load with '+str(status)
-		if status:
-			print 'spin up'
-			#tmp_cq = adapter.couch_queue()
-			#thread_id = uuid.uuid4()
-			#threads[thread_id] = tmp_cq
-			new_worker = caller(bobbin)
-			new_worker.spindle = comm.method.queue
-			new_worker.setDaemon(True)
-			threads[str(new_worker.id)] = new_worker
-			print 'start worker'
-			new_worker.start()
-			print 'worker running'
-			#tmp_cq.start_spool(ref['bobbin'],new_worker.callback)
-			cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(new_worker.id),'name':bobbin}}))
-		else:
-			cq.channel.basic_publish('error','error',json.dumps({'error':body}))
+    print body
+    try:
+        ref = json.loads(body)
+    except:
+        print body + ' not json'
+        ch.basic_ack(delivery_tag = method.delivery_tag)
+        return
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+    if 'stop' in ref:
+        print threads
+        print 'stopping' + str(ref)
+        if ref['stop'] in threads:
+            the_thread = threads[ref['stop']]
+            the_thread.stop()    
+    if 'start_bobbin' in ref:
+        bobbin = ref['start_bobbin']
+        print 'try load'
+        status , caller = try_load(bobbin)
+        print 'finish load with '+str(status)
+        if status:
+            print 'spin up'
+            #tmp_cq = adapter.couch_queue()
+            #thread_id = uuid.uuid4()
+            #threads[thread_id] = tmp_cq
+            new_worker = caller(bobbin)
+            new_worker.cb = notify
+            new_worker.spindle = comm.method.queue
+            new_worker.setDaemon(True)
+            threads[str(new_worker.id)] = new_worker
+            print 'start worker'
+            new_worker.start()
+            print 'worker running'
+            #tmp_cq.start_spool(ref['bobbin'],new_worker.callback)
+            cq.channel.basic_publish('command','notify',json.dumps({'bobbin':{'id':str(new_worker.id),'name':bobbin}}))
+        else:
+            cq.channel.basic_publish('error','error',json.dumps({'error':body}))
 
-		if bobbin  == 'status':
-			print threads
-			for i in threads:
-				worker = threads[i]
-				info = {'status':'check'
-						,'spindle':worker.spindle,
-						'queue':worker.queue,
-						'uuid':str(i)}
-				print worker.spindle,worker.queue,i
-				cq.channel.basic_publish('command','notify',json.dumps(info))
+        if bobbin  == 'status':
+            print threads
+            for i in threads:
+                worker = threads[i]
+                info = {'status':'check'
+                        ,'spindle':worker.spindle,
+                        'queue':worker.queue,
+                        'uuid':str(i)}
+                print worker.spindle,worker.queue,i
+                cq.channel.basic_publish('command','notify',json.dumps(info))
 
-		if bobbin == 'die':
-			ch.stop_consuming()
+        if bobbin == 'die':
+            ch.stop_consuming()
 
 "start the spindle"
 cq.run_queue(comm.method.queue,comm_callback)
