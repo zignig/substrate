@@ -4,6 +4,7 @@ incoming:
   thingi_id: thingiverse
   download: downloads
   process: process
+  mark: web_interface
 render:
   stl_viz: stl_viz
   thumbnail: thumbnail
