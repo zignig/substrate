@@ -3,7 +3,7 @@ import adapter,requests
 " spindle govenor "
 class govenor(adapter.worker):
     def __init__(self,queue):
-        adapter.worker.__init__(self,queue)
+        adapter.worker.__init__(self,queue,timeout=False)
         self.qi = queue_info(self.cq)
         self.bobbins = []
     
@@ -19,12 +19,12 @@ class govenor(adapter.worker):
             for j in d.keys():
                 print 'start '+j
                 self.cq.channel.basic_publish('',body['spindle']['queue'],adapter.encode({'start_bobbin':j}))
-        if 'action' in body:
-            length = self.qi.queue_length(body['name'])
-            print length
-            if length >= 0:
-                print 'start' + body['name']
-                self.cq.channel.basic_publish('command','notify',adapter.encode({'start_bobbin':body['name']}))
+#        if 'action' in body:
+#            length = self.qi.queue_length(body['name'])
+#            print length
+#            if length >= 0:
+#                print 'start' + body['name']
+#                self.cq.channel.basic_publish('command','notify',adapter.encode({'start_bobbin':body['name']}))
         if 'bobbin' in body:
             self.bobbins.append(body['bobbin'])
         if 'start_bobbin' in body:

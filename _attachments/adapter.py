@@ -6,6 +6,7 @@ import yaml,pika,redis,uuid
 import threading
 import logging
 
+
 logging.basicConfig()
 
 TTL = 9600 
@@ -76,6 +77,7 @@ class couch_queue:
             channel = connection.channel()
             channel.basic_qos(prefetch_count=1)
             self.channel = channel
+            self.connection = connection
             print("connected")
         except:
             print("broker failed")
@@ -231,19 +233,22 @@ def decode(value):
     return json.loads(value)
 
 class worker(threading.Thread):
-    def __init__(self,queue_name,cb=None,count=20):
+    def __init__(self,queue_name,cb=None,timeout = True):
         print "building"
         threading.Thread.__init__(self)
+        self.timeout = timeout
         self.cq = couch_queue()
         self.routes = self.cq.routes
         print queue_name
+        #self.q = self.cq.channel.queue_declare(queue=queue_name)
         self.queue = queue_name
         self.id = uuid.uuid4()
-        self.count = count
         self.channel = self.cq.channel
+        self.connection = self.cq.connection
         self.cb = cb
         self.callback = self.base_callback
-    
+        self.log = logging.getLogger(name=queue_name)
+        
     def consume(self,body):
         print 'sub ',self.queue,body
         self.channel.basic_publish('logging','error',encode({'consume':str(body),'queue':self.queue}))
@@ -263,16 +268,18 @@ class worker(threading.Thread):
             self.channel.basic_publish('logging','logging',encode({'consume':str(body),'queue':self.queue}))
             if 'route' in data:
                 self.route_message(data)
-        if result == None:
-            if 'route' in data:
-                self.route_message(data)
+#        if result == None:
+#            if 'route' in data:
+#                self.route_message(data)
         if result == False:
             self.channel.basic_publish('error','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
-        self.count -= 1 
         ch.basic_ack(delivery_tag = method.delivery_tag)
-        if self.count == 0:
-            self.stop()
     
+    def to(self):
+        # timeout
+        print 'timeout '+self.queue
+        self.stop()
+        
     def stop(self):
         self.channel.stop_consuming()
         self.channel.close()
@@ -283,7 +290,9 @@ class worker(threading.Thread):
         self.channel.couch = self.cq.server
         self.channel.config = self.cq.config
         self.channel.db = self.cq.db
-        self.channel.basic_consume(self.callback,queue=self.queue)
+        if self.timeout:
+            self.connection.add_timeout(10,self.to)
+        self.channel.basic_consume(self.callback,queue=self.queue,consumer_tag=self.queue)
         print "bound consume"
         self.channel.start_consuming()
         if self.cb != None:
