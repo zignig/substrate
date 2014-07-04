@@ -52,7 +52,7 @@ def callback(ch, method, properties, body):
                 ch.cq.redis.sadd('running_bobbins',target_spool)
                 #ch.basic_publish('error','error',json.dumps({'info':ref,'target_spool':target_spool}))
                 cq.redis.set('recent:'+routing_key,'')
-                cq.redis.expire('recent:'+routing_key,1)
+                cq.redis.expire('recent:'+routing_key,30)
         else:
             print 'unknown key '+routing_key
             print 'binding '+exchange+' -> '+routing_key+' to unknown' 

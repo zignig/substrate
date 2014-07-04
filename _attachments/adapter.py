@@ -233,14 +233,15 @@ def decode(value):
     return json.loads(value)
 
 class worker(threading.Thread):
-    def __init__(self,queue_name,cb=None,timeout = True):
+    def __init__(self,queue_name,cb=None,runout=True):
         print "building"
         threading.Thread.__init__(self)
-        self.timeout = timeout
+        self.runout = runout
         self.cq = couch_queue()
         self.routes = self.cq.routes
         print queue_name
         #self.q = self.cq.channel.queue_declare(queue=queue_name)
+        self.quit = False
         self.queue = queue_name
         self.id = uuid.uuid4()
         self.channel = self.cq.channel
@@ -260,7 +261,7 @@ class worker(threading.Thread):
             self.channel.basic_publish(next_target[0],next_target[1],encode(body))
         
     def base_callback(self,ch, method, properties, body):
-        mess = {'ex':method.exchange,'rk':method.routing_key,'body':body}
+        #mess = {'ex':method.exchange,'rk':method.routing_key,'body':body}
         #print dir(self.channel)
         data = json.loads(body)
         result = self.consume(data)
@@ -274,7 +275,7 @@ class worker(threading.Thread):
         if result == False:
             self.channel.basic_publish('error','error',encode({'consume':str(body),'queue':self.queue,'error':'error'}))
         ch.basic_ack(delivery_tag = method.delivery_tag)
-    
+        
     def to(self):
         # timeout
         print 'timeout '+self.queue
@@ -290,13 +291,22 @@ class worker(threading.Thread):
         self.channel.couch = self.cq.server
         self.channel.config = self.cq.config
         self.channel.db = self.cq.db
-        if self.timeout:
-            self.connection.add_timeout(10,self.to)
-        self.channel.basic_consume(self.callback,queue=self.queue,consumer_tag=self.queue)
         print "bound consume"
-        self.channel.start_consuming()
-        if self.cb != None:
-            self.cb(str(self.id),self.queue)
-        print 'exit worker'
+        if self.runout:
+            while not self.quit:
+                msg = self.channel.basic_get(self.queue)
+                #print(msg)
+                if msg[0] == None:
+                    self.quit = True
+                else:
+                    self.base_callback(self.channel,msg[0],msg[1],msg[2])
+            #self.connection.close()
+        else:
+            self.channel.basic_consume(self.callback,queue=self.queue,consumer_tag=self.queue)
+            self.channel.start_consuming()
+        
+        #if self.cb != None:
+        #    self.cb(str(self.id),self.queue)
+        #print 'exit worker'
 
             

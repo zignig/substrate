@@ -3,7 +3,7 @@ import adapter,requests
 " spindle govenor "
 class govenor(adapter.worker):
     def __init__(self,queue):
-        adapter.worker.__init__(self,queue,timeout=False)
+        adapter.worker.__init__(self,queue,runout=False)
         self.qi = queue_info(self.cq)
         self.bobbins = []
     
