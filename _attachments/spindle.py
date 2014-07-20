@@ -60,7 +60,7 @@ def comm_callback(ch, method, properties, body):
             new_worker.cb = notify
             new_worker.spindle = comm.method.queue
             new_worker.setDaemon(True)
-            #threads[str(new_worker.id)] = new_worker
+            threads[str(new_worker.id)] = new_worker
             print 'start worker'
             new_worker.start()
             print 'worker running'
